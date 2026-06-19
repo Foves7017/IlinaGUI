@@ -1,0 +1,26 @@
+# 窗口的基本设置
+window_base:
+  window_background_color: '#f5f5f5'  # 窗口背景色
+  text_color: '#000000'
+  button_hover_color: '#cccccc'  
+  button_pressed_color: '#888888'  
+  close_button_hover_color: '#f03e3e'  
+  close_button_pressed_color: '#bd3030'
+  title_board_color: '#999999'
+chat_window:
+  role_label_text_color: '#666666'  
+
+  input_area_background_color: '#DADADA'
+  input_button_color: '#CFCFCF'
+  input_button_hover_color: '#9F9FCF'
+  input_button_pressed_color: '#6F6FCF'
+
+  role_user_color: '#B89A3A'
+  role_assistant_color: '#4A6A8A'
+  role_tool_color: '#5A7A5C'
+  role_system_color: '#808080'
+  role_line_color: '#000000'
+  
+  float_window_background_color: '#000000'
+  float_window_background_alpha: 192
+  float_window_shadow_start_alpha: 40

@@ -1,0 +1,51 @@
+* {
+    /* background-color: {{window_background_color}}; */
+    background-color: rgba(0, 0, 0, 0);
+    color: {{text_color}};
+}
+
+#WindowBase {
+    background-image: url("{{background_images}}");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#BackgroundFilter {
+    background-color: rgba(0, 0, 0, 192);
+}
+
+/* 标题栏 */
+#TitleBar {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    border-bottom: 1px solid {{title_board_color}};
+}
+
+/* 标题栏按钮的通用设置 */
+QPushButton { 
+    margin: 0px;
+    border: 0px;
+    padding: 0px 10px;
+    margin-bottom: 5px;
+}
+QPushButton:pressed {
+    padding-top: 10px;
+    padding-bottom: 6px;
+}
+
+/* 关闭按钮 */
+QPushButton#TitleBarClose:hover {
+    background-color: {{close_button_hover_color}};
+}
+QPushButton#TitleBarClose:pressed {
+    background-color: {{close_button_pressed_color}};
+}
+
+/* 最小化和最大化按钮 */
+QPushButton#TitleBarButton:hover {
+    background-color: {{button_hover_color}};
+}
+QPushButton#TitleBarButton:pressed {
+    background-color: {{button_pressed_color}};
+}

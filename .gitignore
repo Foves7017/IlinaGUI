@@ -1,3 +1,9 @@
+.ilina
+configs/*
+!configs/default_system.md
+logs
+0A_PackTest
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

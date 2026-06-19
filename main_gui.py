@@ -1,0 +1,38 @@
+# 启动 Magager 的入口
+import os
+import sys
+import datetime 
+from PySide6.QtWidgets import QApplication
+
+from FovesLog import setup_log
+from windows import ChatWindow
+from QSS.color_loader import QSSFormatter
+
+DEFAULT_SAVE_PATH = r'.ilina'
+
+if __name__ == '__main__':
+    setup_log()
+
+    app_argv = sys.argv[:]
+
+    if sys.platform == 'win32':
+        app_argv += ['-platform', 'windows:darkmode=2']
+
+    app = QApplication(app_argv) 
+
+    # 创建窗口和信号连接
+    if len(sys.argv) > 1:
+        if os.path.isfile(sys.argv[1]) or sys.argv[1].endswith('.ilinatree'):
+            file_path = sys.argv[1]
+        else:
+            file_path = os.path.join(sys.argv[1], datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")+'.ilinatree') 
+    else:
+        file_path = os.path.join(DEFAULT_SAVE_PATH, datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")+'.ilinatree')
+    print(f'{file_path=}')
+    form = ChatWindow(file_path)
+    app.styleHints().colorSchemeChanged.connect(form._on_color_scheme_changed)
+
+    form.show()
+
+    sys.exit(app.exec())
+
