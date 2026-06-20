@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class WindowConfig(BaseModel):
     """ 窗口配置 """
     edge_board: int = 5  # 用于边界拖动的宽度
-    titlebar_height: int = 36  # 标题栏的高度
+    titlebar_height: int = 48  # 标题栏的高度
     window_state: str = ''  # 保存窗口状态
     default_size: tuple[int, int] = (1440, 960)  # 默认窗口尺寸
     scheme_setting: Literal['light', 'dark', 'auto'] = 'auto'

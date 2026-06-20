@@ -1,43 +1,54 @@
+/* -------------------- 全局属性 ---------------------------- */
 * {
-    padding: 0;
     margin: 0;
     border: 0;
-    background-color: rgba(255, 255, 255, 0);
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
 }
 
-/* 标题栏 */
-#TitleLabel {
-    font-family: 'Maple Mono NF CN';
-    font-weight: bold;
-    font-size: 18px;
+/* -------------------- 分割区域 ---------------------------- */
+#Splitter {
+    border-top: 1px solid {{general_split_line_color}};
 }
 
-#TitleLabel:enabled {
-    background-color: rgba(255, 255, 255, 64);
+/* -------------------- 对话区域 ---------------------------- */
+#TalkArea {
+    border-left: 1px solid {{general_split_line_color}};
+}
+
+/* -------------------- 输入区域 ---------------------------- */
+#InputArea {
+    background-color: {{input_area_backgournd_color}};
+    border: 1px solid {{general_split_line_color}};
     border-radius: 8px;
+    /* padding: 8px; */
 }
 
-#ConversionItemContentBlock {
-    font-size: 15px;
+#InputTextedit {
+    font-size: 14px;
 }
 
-#ConversionItemContentBlock:enabled {
+#InputSendButton {
+    background-color: {{input_button_background_color}};
+    font-size: 20px;
+    border: 1px solid {{input_button_boarder_color}};
     border-radius: 4px;
-    background-color: rgba(255, 255, 255, 64);
+    padding: 2px 12px;
 }
 
-#ConversionItemContentBlock:disabled {
-    background-color: rgba(255, 255, 255, 0);
+#InputSendButton:hover {
+    background-color: {{input_button_hover_background_color}};
+    font-size: 20px;
 }
 
-#ConversionItemReasoningContentBlock {
-    font-size: 10px;
-    color: {{role_label_text_color}};
+#InputSendButton:pressed {
+    background-color: {{input_button_pressed_background_color}};
+    font-size: 16px;
 }
 
+/* -------------------- 滚动消息区域 ---------------------------- */
+/* 角色标签 */
 #ConversionItemRoleLabel {
-    color: {{role_label_text_color}};
-    background-color: rgba(255, 255, 255, 0);
     font-weight: bold;
     font-family: 'Maple Mono NF CN';
     font-size: 14px;
@@ -64,42 +75,84 @@
     border-right: 2px solid {{role_system_color}};
 }
 
-#InputArea {
-    background-color: rgba(37, 37, 37, 128);
-    border: 1px solid {{role_label_text_color}};
-    border-radius: 8px;
+/* 内容正文框 */
+#ConversionItemContentBlock {
+    font-size: 15px;
 }
 
-
-#InputTextedit {
-    font-size: 14px;
-}
-
-#InputSendButton {
-    background-color: {{input_button_color}};
-    font-size: 20px;
-    border: 1px solid {{role_label_text_color}};
+#ConversionItemContentBlock:enabled {
     border-radius: 4px;
-    padding: 2px 12px;
+    background-color: {{conversion_item_editing_background_color}};
 }
 
-#InputSendButton:hover {
-    background-color: {{input_button_hover_color}};
-    font-size: 20px;
+#ConversionItemReasoningContentBlock {
+    font-size: 10px;
+    color: {{role_label_text_color}};
 }
 
-#InputSendButton:pressed {
-    background-color: {{input_button_pressed_color}};
-    font-size: 16px;
+/* 按钮 */
+#ConversionItemButton {
+    padding: 4px;
+    border-radius: 4px;
+    font-family: 'Maple Mono NF CN';
 }
 
-#TreeArea {
-    border-right: 1px solid {{role_label_text_color}};
+#ConversionItemButton:hover {
+    background-color: rgba(255, 255, 255, 64);
 }
 
-#Splitter {
-
+#ConversionItemButton:pressed {
+    background-color: rgba(255, 255, 255, 128);
+    padding-top: 8px;
+    padding-bottom: 0px;
 }
+
+/* --------------------对话标题---------------------------- */
+
+#TitleLabel {
+    font-family: 'Maple Mono NF CN';
+    font-weight: bold;
+    font-size: 18px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 64);
+}
+
+#TitleLabel:read-only {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+#TitleLabel:hover {
+    background-color: rgba(255, 255, 255, 64);
+}
+
+/* --------------------状态标志---------------------------- */
+
+#StateLabel {
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-family: 'Maple Mono NF CN';
+    background-color: rgba(255, 255, 255, 64);
+    font-weight: bold;
+}
+
+#StateLabel:hover {
+    background-color: rgba(255, 255, 255, 128);
+}
+
+#StateLabel[state='空闲'] {
+    color: #FFF;
+}
+
+#StateLabel[state='连接API服务中...'] {
+    color: #FFA;
+}
+
+#StateLabel[state='传输信息流中...'] {
+    color: #AFA;
+}
+
+/* --------------------浮动窗口---------------------------- */
+
 
 #LayoutNodeFloatWindowRole {
     background-color: rgba(255, 255, 255, 0);
@@ -136,41 +189,4 @@
 
 #FloatWindowFunctionButton:disabled {
     color: rgba(255, 255, 255, 64)
-}
-
-
-#ConversionItemButton {
-    padding: 4px;
-    border-radius: 4px;
-    font-family: 'Maple Mono NF CN';
-}
-
-#ConversionItemButton:hover {
-    background-color: rgba(255, 255, 255, 64);
-}
-
-#ConversionItemButton:pressed {
-    background-color: rgba(255, 255, 255, 128);
-    padding-top: 8px;
-    padding-bottom: 0px;
-}
-
-#StateLabel {
-    padding: 2px 8px;
-    border-radius: 8px;
-    font-family: 'Maple Mono NF CN';
-    background-color: rgba(255, 255, 255, 64);
-    font-weight: bold;
-}
-
-#StateLabel[state='空闲'] {
-    color: #FFF;
-}
-
-#StateLabel[state='连接API服务中...'] {
-    color: #FFA;
-}
-
-#StateLabel[state='传输信息流中...'] {
-    color: #AFA;
 }

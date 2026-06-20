@@ -11,6 +11,7 @@ chat_window:
   role_label_text_color: '#666666'  
 
   input_area_background_color: '#DADADA'
+  input_button_boarder_color: 'rgba(0, 0, 0, 64)'
   input_button_color: '#CFCFCF'
   input_button_hover_color: '#9F9FCF'
   input_button_pressed_color: '#6F6FCF'
@@ -19,6 +20,7 @@ chat_window:
   role_assistant_color: '#4A6A8A'
   role_tool_color: '#5A7A5C'
   role_system_color: '#808080'
+  role_error_color: '#FFB0B0'
   role_line_color: '#000000'
   
   float_window_background_color: '#000000'

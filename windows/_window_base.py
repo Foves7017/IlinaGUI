@@ -2,7 +2,7 @@ import sys
 import ctypes
 import logging
 
-from typing import Literal
+from typing import Literal, Callable
 from ctypes import windll, byref, sizeof
 from ctypes.wintypes import HWND, INT
 
@@ -64,18 +64,10 @@ class WindowBase(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        app = QtWidgets.QApplication.instance()
-        assert app is not None
-        self.app: QApplication = app # pyright: ignore[reportAttributeAccessIssue]
-
         self.setWindowIcon(QIcon('./images/ico.ico'))
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setObjectName('WindowBase')
-        qss_formatter.add_qss_info(QSSInfo(
-            widget=self,
-            qss_filename=QSSFiles.window_base
-        ))
+        qss_formatter.add_widget(self, 'WindowBase', QSSFiles.window_base)
     
         # 日志
         self.log = logging.getLogger(f'窗口基类')
@@ -93,14 +85,14 @@ class WindowBase(QtWidgets.QWidget):
             self.edge_board = conf.edge_board
             self.titlebar_height = conf.titlebar_height
 
+        # 窗口
         window_layout = QtWidgets.QVBoxLayout(self)
         window_layout.setContentsMargins(0, 0, 0, 0)
+
+        # 背景滤镜
         backgournd_filter_widget = QtWidgets.QWidget()
         backgournd_filter_widget.setObjectName('BackgroundFilter')
-        qss_formatter.add_qss_info(QSSInfo(
-            widget=backgournd_filter_widget,
-            qss_filename=QSSFiles.window_base
-        ))
+        qss_formatter.add_widget(backgournd_filter_widget, 'BackgroundFilter', QSSFiles.window_base)
         window_layout.addWidget(backgournd_filter_widget)
 
         # 设置根布局
@@ -111,20 +103,28 @@ class WindowBase(QtWidgets.QWidget):
         # 设置顶栏
         self.root_layout.addWidget(self._setup_topbar())
 
+        # 加载中 Label
+        self.loading_label = QtWidgets.QLabel(text='Now Loading...')
+        self.loading_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.loading_label.setWordWrap(True)
+        font = self.loading_label.font()
+        font.setPointSize(24)
+        self.loading_label.setFont(font)
+        self.root_layout.addWidget(self.loading_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
         # 标志变量
         self.Maximized: bool = False
 
         # 启用 DWM 阴影 + Aero Snap + 最大化动画
         self._setup_dwm()
     
-        # 初始化 QSS 表
-        self.reload_style()
 
     def _get_scheme(self) -> Literal['light', 'dark']:
         # 确定颜色主题
+        app: QApplication = QtWidgets.QApplication.instance() # pyright: ignore[reportAssignmentType]
         with ConfigLoader(CONFIG_PATH, WindowConfig) as conf:
             if conf.scheme_setting == 'auto':
-                scheme = 'dark' if self.app.styleHints().colorScheme() == Qt.ColorScheme.Dark else 'light'
+                scheme = 'dark' if app.styleHints().colorScheme() == Qt.ColorScheme.Dark else 'light'
             else:
                 scheme = conf.scheme_setting
         return scheme
@@ -181,7 +181,6 @@ class WindowBase(QtWidgets.QWidget):
         for child in self.findChildren(QtWidgets.QWidget):
             child.setMouseTracking(True)
         # 下一帧触发重载
-        QTimer.singleShot(0, self.reload_style)
         QTimer.singleShot(0, self.reload_icon)
         return super().showEvent(event)
 
@@ -320,7 +319,7 @@ class WindowBase(QtWidgets.QWidget):
         if y > h - b:  edges |= Qt.Edge.BottomEdge
         return edges
     
-    def reload_style(self):
+    def reload_style(self, callback: Callable|None=None):
         """ 从文件重新加载样式 """
         scheme = self._get_scheme()
         # 加载 QSS
@@ -338,6 +337,9 @@ class WindowBase(QtWidgets.QWidget):
             qss_formatter.delete_qss_infos(delete_list)
         except AttributeError:
             self.log.warning(f'跳过了加载 QSS')
+        # 如果指定了回调函数就调用
+        if callback is not None:
+            callback()
     
     def reload_icon(self):
         scheme = self._get_scheme()

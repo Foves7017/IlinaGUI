@@ -1,8 +1,16 @@
-# 从 colors.YAML 中导入颜色
-# [INFO] 颜色一定要以 _color 结尾！
-# [INFO] 颜色一定要以 _color 结尾！
-# [INFO] 颜色一定要以 _color 结尾！
-# [INFO] 添加颜色的步骤：1. 在 QSS 里写样式。2. 在 dark 和 light 两个 yaml 里指定颜色。3. 更新颜色类
+# =====================================================================
+#  color_loader.py  —  QSS 颜色与配置加载器
+# =====================================================================
+# [说明] 颜色一定要以 _color 结尾！
+# [说明] 颜色一定要以 _color 结尾！
+# [说明] 颜色一定要以 _color 结尾！
+# [说明] 添加颜色的步骤：
+#        1. 在 QSS 里写样式。
+#        2. 在 dark 和 light 两个 yaml 里指定颜色。
+#        3. 更新本文件中的颜色类。
+# [同步] 本文件的默认值应与 Colors_dark.yaml / Colors_light.yaml 保持同步。
+# =====================================================================
+
 import re
 import yaml
 import random
@@ -12,43 +20,59 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from PySide6.QtWidgets import QWidget
 from typing import Literal, overload
+from IlinaEngine.type import IlinaMessageRoles
 
-# --------------------------------------------------------------------
-
+# ----------------- 窗口的基本设置 ----------------------------------------
+# 对应 YAML 中 window_base 节点
 class WindowBaseColors(BaseModel):
-    window_background_color: str = '#1f1f1f'
-    text_color: str = '#FFFFFF'
+    window_background_color: str = 'rgba(64, 64, 64, 255)'          # 窗口背景色
+    background_filter_color: str = 'rgba(0, 0, 0, 192)'             # 背景滤镜色（模态框遮罩）
+    text_color: str = 'rgba(255, 255, 255, 255)'                    # 默认文字颜色
+    button_hover_color: str = 'rgba(255, 255, 255, 64)'             # 普通按钮悬停色
+    button_pressed_color: str = 'rgba(255, 255, 255, 128)'          # 普通按钮按下的颜色
+    close_button_hover_color: str = 'rgba(240, 62, 62, 255)'        # 关闭按钮悬停色
+    close_button_pressed_color: str = 'rgba(189, 48, 48, 255)'      # 关闭按钮按下的颜色
 
-    button_hover_color: str = '#333333'
-    button_pressed_color: str = '#cccccc'
 
-    close_button_hover_color: str = '#f03e3e'
-    close_button_pressed_color: str = '#bd3030'
-
-    title_board_color: str = '#FFFFFF'
-
+# ----------------- 对话窗口设置 ------------------------------------------
+# 对应 YAML 中 chat_window 节点
 class ChatWindowColors(BaseModel):
-    role_label_text_color: str = "#DDDDDD"
+    general_split_line_color: str = 'rgba(255, 255, 255, 192)'      # 全局分割线颜色
 
-    input_area_background_color: str = '#252525'
-    input_button_color: str = '#303030'
-    input_button_hover_color: str = '#303060'
-    input_button_pressed_color: str = '#303090'
+    input_area_backgournd_color: str = 'rgba(255, 255, 255, 64)'    # 输入框背景颜色
+    input_area_boarder_color: str = 'rgba(255, 255, 255, 255)'      # 输入框边框颜色
+    input_button_background_color: str = 'rgba(255, 255, 255, 64)'  # 按钮背景颜色
+    input_button_boarder_color: str = 'rgba(255, 255, 255, 0)'      # 按钮边框颜色
+    input_button_hover_background_color: str = 'rgba(50, 50, 100, 128)'            # 发送按钮悬停颜色
+    input_button_pressed_background_color: str = 'rgba(50, 50, 100, 255)'           # 发送按钮按下颜色
+    conversion_item_editing_background_color: str = 'rgba(255, 255, 255, 64)'  # 对话条目编辑背景色
+    conversion_item_reasoning_content_color: str = "#DDDDDD"    # 对话条目思考文字颜色
+    role_user_color: str = '#C4A84A'                                 # 用户角色颜色
+    role_assistant_color: str = '#7E9BB5'                            # 助手角色颜色
+    role_tool_color: str = '#8AA38D'                                 # 工具角色颜色
+    role_system_color: str = '#A8A8A8'                               # 系统角色颜色
+    role_error_color: str = "#FFB0B0"                                # 错误角色颜色
 
-    role_user_color: str = '#C4A84A'
-    role_assistant_color: str = '#7E9BB5'
-    role_tool_color: str = '#8AA38D'
-    role_system_color: str = '#A8A8A8'
-    role_line_color: str = '#FFFFFF'
 
-    float_window_background_color: str = '#000000'
-    float_window_background_alpha: int = 128
-    float_window_shadow_start_alpha: int = 40
+    # ----- 斩杀线 ----
+
+    role_label_text_color: str = "#DDDDDD"                           # 角色标签文字颜色
+
+    input_button_color: str = '#303030'                              # 输入按钮颜色
+
+    role_line_color: str = '#FFFFFF'                                 # 角色分割线颜色
+
+    float_window_background_color: str = '#000000'                   # 浮动窗口背景色
+    float_window_background_alpha: int = 128                         # 浮动窗口背景透明度 (0-255)
+    float_window_shadow_start_alpha: int = 40                        # 浮动窗口阴影起始透明度
+
 
 class Colors(BaseModel):
     window_base: WindowBaseColors = Field(default_factory=WindowBaseColors)
     chat_window: ChatWindowColors = Field(default_factory=ChatWindowColors)
 
+# --------------------------------------------------------------------
+#  以下为配置类与 QSS 注入逻辑，通常不需要频繁修改
 # --------------------------------------------------------------------
 
 class ChatWindowConfigs(BaseModel):
@@ -63,7 +87,7 @@ class ChatWindowConfigs(BaseModel):
     float_window_fixed_height: int = 150
 
 class WindowBaseConfigs(BaseModel):
-    background_images: str|list[str] = []
+    background_images: str|list[str]|None = []
 
 class Configs(BaseModel):
     chat_window: ChatWindowConfigs = Field(default_factory=ChatWindowConfigs)
@@ -71,7 +95,7 @@ class Configs(BaseModel):
 
 # --------------------------------------------------------------------
 
-class QSSFiles(Enum):
+class QSSFiles(str, Enum):
     window_base = 'window_base'
     chat_window = 'chat_window'
 
@@ -121,7 +145,9 @@ class QSSFormatter:
             if config_path.exists():
                 self.config: Configs = Configs.model_validate(yaml.safe_load(config_path.read_text(encoding='UTF8')))
                 # 如果背景是一个列表，就随机选择一个
-                if isinstance(self.config.window_base.background_images, list):
+                if self.config.window_base.background_images is None:
+                    self.config.window_base.background_images = ''
+                elif isinstance(self.config.window_base.background_images, list):
                     self.config.window_base.background_images = random.choice(self.config.window_base.background_images)
         except Exception as e:  # 读取错误什么的
             self.log.error(f'读取配置文件时发生错误: {e}')
@@ -133,18 +159,21 @@ class QSSFormatter:
             try:
                 # 读取
                 with open(f'./QSS/{filename}.qss', 'r', encoding='UTF8') as f:
-                    sheet = f.read()
+                    sheet = f.read()    
+
                 # 获取对应子类并替换
-                color_class: BaseModel = getattr(self.colors, filename)
-                for key in type(color_class).model_fields:
-                    sheet = sheet.replace('{{' + key + '}}', str(getattr(color_class, key)))
+                if hasattr(self.colors, filename):
+                    color_class: BaseModel = getattr(self.colors, filename)
+                    for key in type(color_class).model_fields:
+                        sheet = sheet.replace('{{' + key + '}}', str(getattr(color_class, key)))
+                        
                 if hasattr(self.config, filename):
                     config_class: BaseModel = getattr(self.config, filename)
                     for key in type(config_class).model_fields:
                         sheet = sheet.replace('{{' + key + '}}', str(getattr(config_class, key)))
                 
                 for word in re.findall(r'\{\{.*?\}\}', sheet):
-                    self.log.warning(f'未替换的变量 {word}')
+                    self.log.warning(f'{filename} 中未替换的变量 {word}')
 
                 # 缓存
                 self.sheets[QSSFiles(filename)] = sheet
@@ -169,3 +198,15 @@ class QSSFormatter:
             return '\n'.join([self.sheets[name] for name in name])
         else:
             return self.sheets[name]
+    
+    def get_role_color(self, role: IlinaMessageRoles):
+        if role == 'assistant':
+            return self.colors.chat_window.role_assistant_color
+        elif role == 'user':
+            return self.colors.chat_window.role_user_color
+        elif role == 'tool':
+            return self.colors.chat_window.role_tool_color
+        elif role == 'error':
+            return self.colors.chat_window.role_error_color
+        elif role == 'system':
+            return self.colors.chat_window.role_system_color

@@ -3,6 +3,8 @@ configs/*
 !configs/default_system.md
 logs
 0A_PackTest
+.vscode
+.obsidian
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

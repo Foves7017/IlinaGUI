@@ -1,0 +1,197 @@
+/* --------------------全局属性---------------------------- */
+
+* {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+/* -------------------------------------------------------- */
+/* --------------------对话标题---------------------------- */
+
+#TitleLabel {
+    font-family: 'Maple Mono NF CN';
+    font-weight: bold;
+    font-size: 18px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 64);
+}
+
+#TitleLabel:read-only {
+    /* 编辑中的样式 */
+    background-color: rgba(255, 255, 255, 0);
+}
+
+#TitleLabel:hover {
+    background-color: rgba(255, 255, 255, 64);
+}
+
+/* -------------------------------------------------------- */
+/* --------------------状态标志---------------------------- */
+
+#StateLabel {
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-family: 'Maple Mono NF CN';
+    background-color: rgba(255, 255, 255, 64);
+    font-weight: bold;
+}
+
+#StateLabel:hover {
+    background-color: rgba(255, 255, 255, 128);
+}
+
+#StateLabel[state='空闲'] {
+    color: #FFF;
+}
+
+#StateLabel[state='连接API服务中...'] {
+    color: #FFA;
+}
+
+#StateLabel[state='传输信息流中...'] {
+    color: #AFA;
+}
+
+/* -------------------------------------------------------- */
+
+
+
+#ConversionItemContentBlock {
+    font-size: 15px;
+}
+
+#ConversionItemContentBlock:enabled {
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 64);
+}
+
+#ConversionItemContentBlock:disabled {
+    background-color: rgba(255, 255, 255, 0);
+}
+
+#ConversionItemReasoningContentBlock {
+    font-size: 10px;
+    color: {{role_label_text_color}};
+}
+
+#ConversionItemRoleLabel {
+    color: {{role_label_text_color}};
+    background-color: rgba(255, 255, 255, 0);
+    font-weight: bold;
+    font-family: 'Maple Mono NF CN';
+    font-size: 14px;
+    padding-right: 5px;
+}
+
+#ConversionItemRoleLabel[role="user"] {
+    color: {{role_user_color}};
+    border-right: 2px solid {{role_user_color}};
+}
+
+#ConversionItemRoleLabel[role="assistant"] {
+    color: {{role_assistant_color}};
+    border-right: 2px solid {{role_assistant_color}};
+}
+
+#ConversionItemRoleLabel[role="tool"] {
+    color: {{role_tool_color}};
+    border-right: 2px solid {{role_tool_color}};
+}
+
+#ConversionItemRoleLabel[role="system"] {
+    color: {{role_system_color}};
+    border-right: 2px solid {{role_system_color}};
+}
+
+#InputArea {
+    background-color: rgba(37, 37, 37, 128);
+    border: 1px solid {{role_label_text_color}};
+    border-radius: 8px;
+}
+
+
+#InputTextedit {
+    font-size: 14px;
+}
+
+#InputSendButton {
+    background-color: {{input_button_color}};
+    font-size: 20px;
+    border: 1px solid {{role_label_text_color}};
+    border-radius: 4px;
+    padding: 2px 12px;
+}
+
+#InputSendButton:hover {
+    background-color: {{input_button_hover_color}};
+    font-size: 20px;
+}
+
+#InputSendButton:pressed {
+    background-color: {{input_button_pressed_color}};
+    font-size: 16px;
+}
+
+#TreeArea {
+    border-right: 1px solid {{role_label_text_color}};
+}
+
+#Splitter {
+
+}
+
+#LayoutNodeFloatWindowRole {
+    background-color: rgba(255, 255, 255, 0);
+    font-weight: bold;
+    font-family: 'Maple Mono NF CN';
+    font-size: 14px;
+    padding-right: 5px;
+}
+
+#LayoutNodeFloatWindowContent {
+    margin: 0px 10px;
+}
+
+#FloatWindowFunctionArea {
+    border-top: 1px solid rgba(255, 255, 255, 128);
+    border-bottom: 1px solid rgba(255, 255, 255, 128);
+}
+
+#FloatWindowFunctionButton {
+    padding: 8px 0px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 192)
+}
+
+#FloatWindowFunctionButton:hover {
+    background-color: rgba(255, 255, 255, 64);   
+}
+
+#FloatWindowFunctionButton:pressed {
+    padding-top: 12px;
+    background-color: rgba(255, 255, 255, 128);   
+}
+
+#FloatWindowFunctionButton:disabled {
+    color: rgba(255, 255, 255, 64)
+}
+
+
+#ConversionItemButton {
+    padding: 4px;
+    border-radius: 4px;
+    font-family: 'Maple Mono NF CN';
+}
+
+#ConversionItemButton:hover {
+    background-color: rgba(255, 255, 255, 64);
+}
+
+#ConversionItemButton:pressed {
+    background-color: rgba(255, 255, 255, 128);
+    padding-top: 8px;
+    padding-bottom: 0px;
+}

@@ -1,7 +1,7 @@
 import re
+from PySide6.QtGui import QFontMetrics
 from PySide6.QtCore import QEvent, QObject, Qt, Signal, QSize, QTimer
 from PySide6.QtWidgets import QLineEdit, QSizePolicy
-from PySide6.QtGui import QFontMetrics
 
 from QSS import qss_formatter, QSSFiles
 
@@ -11,7 +11,7 @@ class TitleLabel(QLineEdit):
     def __init__(self):
         super().__init__()
         qss_formatter.add_widget(self, 'TitleLabel', QSSFiles.chat_window)
-        self.setEnabled(False)
+        self.setReadOnly(True)
         self.installEventFilter(self)
         self.setSizePolicy(
             QSizePolicy.Policy.Fixed,
@@ -44,15 +44,15 @@ class TitleLabel(QLineEdit):
                     self.saved_text = self.text()
                     self.saved_text = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '', self.saved_text)
                     self.label_edited.emit(self.saved_text)
-                    self.setEnabled(False)
+                    self.setReadOnly(True)
                     self.label = self.saved_text
                     return True
                 elif event.key() in (Qt.Key.Key_Escape,):
                     self.setText(self.saved_text)
-                    self.setEnabled(False)
+                    self.setReadOnly(True)
                     return True
             elif event.type() == QEvent.Type.MouseButtonDblClick:
-                self.setEnabled(True)
+                self.setReadOnly(False)
                 QTimer.singleShot(0, lambda: (self.setFocus(), self.selectAll()))
                 return True
             elif event.type() == QEvent.Type.Paint:

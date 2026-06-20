@@ -1,2 +1,2 @@
 from ._manager import ManagerWindow
-from ._chat import ChatWindow
+from .chat_window import ChatWindow
