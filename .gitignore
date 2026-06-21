@@ -5,6 +5,8 @@ logs
 0A_PackTest
 .vscode
 .obsidian
+_internal
+IlinaGUI.exe
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

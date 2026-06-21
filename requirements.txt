@@ -1,4 +1,4 @@
-setuptools<82
+IlinaEngine
 PySide6
 FovesLog
 FovesConfig
