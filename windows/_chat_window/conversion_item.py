@@ -1,13 +1,17 @@
 from uuid import UUID
+from FovesConfig import ConfigLoader
 from pyperclip import copy as copy_to_clip
 from PySide6.QtGui import QEnterEvent, QMouseEvent
-from PySide6.QtCore import Slot, QTimer, QEvent, Qt, Signal
+from PySide6.QtCore import QObject, Slot, QTimer, QEvent, Qt, Signal
 from PySide6.QtWidgets import QWidget, QLabel, QSizePolicy, QPushButton, QHBoxLayout, QVBoxLayout
 from IlinaEngine.type import IlinaMessage
+from typing import cast
 
 from .markdown_browser import MarkdownBrowser
 
+from utils import app_dir
 from QSS import qss_formatter, QSSFiles
+from ..types import WindowConfig
 
 class ConversionItem(QWidget):
     """ 对话气泡？ """
@@ -20,6 +24,9 @@ class ConversionItem(QWidget):
         self.node_uuid = node_uuid
         self.node_message = message
         self.Editing: bool = False
+
+        # 从设置中读取自动折叠高度备用
+        self.max_collapse_height = ConfigLoader(app_dir()/'configs'/'window.json', WindowConfig).readonly().max_collapse_height
 
         qss_formatter.add_widget(self, 'ConversionItem', QSSFiles.chat_window)
 
@@ -37,6 +44,7 @@ class ConversionItem(QWidget):
         # 显示思考的部分，在 role != assistant 或 reasoning_content 为空的时候隐藏
         self.reasoningContentBlock = MarkdownBrowser()
         qss_formatter.add_widget(self.reasoningContentBlock, 'ConversionItemReasoningContentBlock', QSSFiles.chat_window)
+        self.reasoningContentBlock.setProperty('role', message.role)
         self.reasoningContentBlock.setSizePolicy(
             self.reasoningContentBlock.sizePolicy().horizontalPolicy(),
             QSizePolicy.Policy.Maximum
@@ -108,6 +116,7 @@ class ConversionItem(QWidget):
         float_button_layout.addWidget(self.float_copy_button)
         float_button_layout.addWidget(self.float_restart_button)
         float_button_layout.addStretch()
+
         # 设置固定高度
         policy = self.float_copy_button.sizePolicy()
         policy.setRetainSizeWhenHidden(True)
@@ -120,10 +129,33 @@ class ConversionItem(QWidget):
         for button in self.float_buttons:
             button.hide()
 
+        # 顶部按钮区的展开按钮
+        self.top_expand_button = QPushButton()
+        self.top_expand_button.setText('展开')
+        qss_formatter.add_widget(self.top_expand_button, 'ConversionItemButton', QSSFiles.chat_window)
+        self.top_expand_button.pressed.connect(self.on_expand_pressed)
+
+        # 顶部按钮区的展开思考按钮
+        self.top_expand_reasoning_button = QPushButton()
+        self.top_expand_reasoning_button.setText('展开思考')
+        qss_formatter.add_widget(self.top_expand_reasoning_button, 'ConversionItemButton', QSSFiles.chat_window)
+        self.top_expand_reasoning_button.pressed.connect(self.on_reason_expand_pressed)
+
+        # 顶部按钮区
+        self.top_button_area = QWidget()
+        qss_formatter.add_widget(self.top_button_area, 'ConversionItemButtonArea', QSSFiles.chat_window)
+        top_button_layout = QHBoxLayout(self.top_button_area)
+        top_button_layout.setSpacing(0)
+        top_button_layout.setContentsMargins(0, 0, 0, 0)
+        top_button_layout.addWidget(self.top_expand_button)
+        top_button_layout.addWidget(self.top_expand_reasoning_button)
+        top_button_layout.addStretch()
+
         # 包括在思考和内容外面的框
         self.contentArea = QWidget()
         self.contentArea.setObjectName('ConversionItemContentArea')
         qss_formatter.add_widget(self.contentArea, 'ConversionItemContentArea', QSSFiles.chat_window)
+        self.contentArea.setProperty('role', self.node_message.role)
         self.contentArea.setSizePolicy(
             self.contentArea.sizePolicy().horizontalPolicy(),
             QSizePolicy.Policy.Maximum
@@ -133,6 +165,7 @@ class ConversionItem(QWidget):
         area_layout = QVBoxLayout(self.contentArea)
         area_layout.setSpacing(0)
         area_layout.setContentsMargins(0, 0, 0, 0)
+        area_layout.addWidget(self.top_button_area)
         area_layout.addWidget(self.reasoningContentBlock)
         area_layout.addWidget(self.contentBlock)
         area_layout.addWidget(self.edit_button_area)
@@ -144,6 +177,14 @@ class ConversionItem(QWidget):
         root_layout.addWidget(self.contentArea)
 
         self.update_message(message)
+        
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if watched is self.roleLabel:
+            if event.type() == QMouseEvent:
+                event = cast(QMouseEvent, event)
+                print(event.button()==Qt.MouseButton.LeftButton)
+        return super().eventFilter(watched, event)
 
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         self.edit_node.emit(self.node_uuid)
@@ -161,6 +202,18 @@ class ConversionItem(QWidget):
         return super().leaveEvent(event)
 
     @Slot()
+    def on_expand_pressed(self):
+        if self.contentBlock.expand:
+            self.edit_cancel_pressed()
+        self.contentBlock.expand = not self.contentBlock.expand
+        self.update_hide()
+    
+    @Slot()
+    def on_reason_expand_pressed(self):
+        self.reasoningContentBlock.expand = not self.reasoningContentBlock.expand
+        self.update_hide()
+
+    @Slot()
     def on_restart_pressed(self):
         self.invoke_from_node.emit(self.node_uuid)
 
@@ -175,6 +228,8 @@ class ConversionItem(QWidget):
         self.Editing = True
         self.update_hide()
         self.contentBlock.show()  # 假设初始内容为空会隐藏，这里单独设置强制显示
+        self.contentBlock.expand = True
+        self.update_hide()
         QTimer.singleShot(0, self.contentBlock.setFocus)
     
     @Slot()
@@ -193,25 +248,40 @@ class ConversionItem(QWidget):
         self.contentBlock.setMarkdown(self.node_message.content)
 
     def update_message(self, message: IlinaMessage):
+        """ 根据节点类型设置消息 """
+        # 设置消息
         if self.node_message.role == 'tool':
-            # self.contentBlock.setMarkdown('**'+ message.tool_name +'**\n\n'+message.content[:50]+('...' if len(message.content) > 50 else ''))
-            self.contentBlock.setMarkdown('**'+ message.tool_name +'**\n\n'+message.content)
+            self.contentBlock.setPlainText(message.content)
+            self.reasoningContentBlock.setPlainText(message.tool_name)
         else:
             self.contentBlock.setMarkdown(message.content)
-        self.reasoningContentBlock.setMarkdown(message.reasoning_content)
-        self.update_hide()
+            self.reasoningContentBlock.setMarkdown(message.reasoning_content)
+        # 如果是 tool 和 system 就直接折叠, assistant 的思考也折叠
+        if self.node_message.role in ['tool', 'system']:
+            self.contentBlock.expand = False
+        elif self.node_message.role == 'assistant':
+            self.reasoningContentBlock.expand = False
+        QTimer.singleShot(0, self.update_hide)
     
     def update_hide(self) -> None:
-        # 是否显示思考
-        if self.node_message.role != 'assistant':
-            self.reasoningContentBlock.hide()
-        else:
-            if self.node_message.reasoning_content == '':
-                self.reasoningContentBlock.hide()
-            else:
+        """ 刷新各个组件的状态 """
+        # 根据节点设置是否显示思考，只有 tool 和 assistant 显示思考
+        # 并且，就算显示思考，如果思考内容为空也隐藏
+        if self.node_message.role in ['assistant', 'tool']:
+            if self.node_message.reasoning_content != '' or self.node_message.tool_name != '':
                 self.reasoningContentBlock.show()
+            else:
+                self.reasoningContentBlock.hide()
+        else:
+            self.reasoningContentBlock.hide()
         
-        # 如果 content 内容未空就不显示
+        # 根据节点内容设置按钮，只有 assistant 且超过高度显示按钮
+        self.top_expand_reasoning_button.hide()
+        if self.node_message.role == 'assistant':
+            if self.reasoningContentBlock.document().size().height() > self.max_collapse_height:
+                self.top_expand_reasoning_button.show()
+        
+        # 如果 content 内容为空就不显示
         if self.node_message.content == '':
             self.contentBlock.hide()
         else:
@@ -224,3 +294,20 @@ class ConversionItem(QWidget):
         else:
             self.edit_button_area.hide()
             self.float_button_area.show()
+        
+        # 是否显示隐藏按钮
+        if self.contentBlock.document().size().height() > self.max_collapse_height:
+            self.top_expand_button.show()
+        else:
+            self.top_expand_button.hide()
+
+        # 根据文本框展开的情况更新按钮文本
+        if self.contentBlock.expand:
+            self.top_expand_button.setText('折叠')
+        else:
+            self.top_expand_button.setText('展开')
+        if self.node_message.role == 'assistant':
+            if self.reasoningContentBlock.expand:
+                self.top_expand_reasoning_button.setText('折叠思考')
+            else:
+                self.top_expand_reasoning_button.setText('展开思考')

@@ -6,8 +6,10 @@ logs
 .vscode
 .obsidian
 _internal
+IlinaGUI
 IlinaGUI.exe
-
+build.bat
+hide_*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

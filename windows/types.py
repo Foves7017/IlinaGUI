@@ -14,3 +14,4 @@ class WindowConfig(BaseModel):
     chat_width_state: bool = False  # True：展开，False：窄
     chat_splitter_state: str = ''
     chat_hide_tree: bool = False
+    max_collapse_height: int = 100

@@ -15,6 +15,7 @@ from PySide6.QtWidgets import QApplication
 
 from .types import WindowConfig
 from QSS import qss_formatter, QSSFiles, QSSInfo
+from utils import app_dir
 
 if sys.platform == 'win32':
     from win32con import (
@@ -38,7 +39,7 @@ if sys.platform == 'win32':
         SIZE_MAXIMIZED
     )
 
-CONFIG_PATH = 'configs/window.json'
+CONFIG_PATH = app_dir()/'configs'/'window.json'
 
 class MARGINS(ctypes.Structure):
     _fields_ = [
@@ -64,7 +65,7 @@ class WindowBase(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowIcon(QIcon('./images/ico.ico'))
+        self.setWindowIcon(QIcon(str(app_dir()/'images'/'ico.ico')))
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         qss_formatter.add_widget(self, 'WindowBase', QSSFiles.window_base)
@@ -329,7 +330,7 @@ class WindowBase(QtWidgets.QWidget):
             qss_formatter.reload(scheme)
             for widget in qss_formatter.qss_table:
                 try:
-                    self.log.info(f'正在为 {widget.widget.objectName()}({type(widget.widget)}) 加载 QSS：{widget.qss_filename}')
+                    self.log.debug(f'正在为 {widget.widget.objectName()}({type(widget.widget)}) 加载 QSS：{widget.qss_filename}')
                     widget.widget.setStyleSheet(qss_formatter.get_sheet(widget.qss_filename))
                 except RuntimeError as e:
                     self.log.warning(f'遇到了出错的组件，正在添加到删除列表...错误：{type(e)}:{e}')
@@ -345,7 +346,7 @@ class WindowBase(QtWidgets.QWidget):
         scheme = self._get_scheme()
 
         # 加载和设置图标
-        self.icons = QImage('./images/titleButtons.png')
+        self.icons = QImage(str(app_dir()/'images'/'titleButtons.png'))
         if scheme == 'dark':
             self.icons.invertPixels()
 

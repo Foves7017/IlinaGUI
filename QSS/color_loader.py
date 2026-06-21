@@ -16,11 +16,12 @@ import yaml
 import random
 import logging
 from enum import Enum
-from pathlib import Path
 from pydantic import BaseModel, Field
 from PySide6.QtWidgets import QWidget
 from typing import Literal, overload
 from IlinaEngine.type import IlinaMessageRoles
+
+from utils import app_dir
 
 # ----------------- 窗口的基本设置 ----------------------------------------
 # 对应 YAML 中 window_base 节点
@@ -130,7 +131,7 @@ class QSSFormatter:
 
     def reload(self, scheme: Literal['light', 'dark']='light') -> None:
         # 读取颜色配置
-        color_path = Path(f'./QSS/Colors_{scheme}.yaml')
+        color_path = app_dir() / 'QSS' / f'Colors_{scheme}.yaml'
         self.log.info(f'颜色文件路径：{color_path}')
         try:
             if color_path.exists():
@@ -140,7 +141,7 @@ class QSSFormatter:
             self.colors: Colors = Colors()
         
         # 读取其他配置
-        config_path = Path(f'./QSS/config.yaml')
+        config_path = app_dir() / 'QSS' / f'config.yaml'
         try:
             if config_path.exists():
                 self.config: Configs = Configs.model_validate(yaml.safe_load(config_path.read_text(encoding='UTF8')))
@@ -158,7 +159,7 @@ class QSSFormatter:
         for filename in QSSFiles.__members__:
             try:
                 # 读取
-                with open(f'./QSS/{filename}.qss', 'r', encoding='UTF8') as f:
+                with open(app_dir()/'QSS'/f'{filename}.qss', 'r', encoding='UTF8') as f:
                     sheet = f.read()    
 
                 # 获取对应子类并替换

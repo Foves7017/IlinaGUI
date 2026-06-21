@@ -92,9 +92,16 @@
     background-color: {{conversion_item_editing_background_color}};
 }
 
+/* 思考内容框 */
 #ConversionItemReasoningContentBlock {
     font-size: 10px;
     color: {{role_label_text_color}};
+}
+
+#ConversionItemReasoningContentBlock[role="tool"] {
+    font-size: 15px;
+    color: {{role_tool_color}};
+    font-family: 'Maple Mono NF CN';
 }
 
 /* 按钮 */

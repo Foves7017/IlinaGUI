@@ -17,8 +17,9 @@ from ._chat_window.talk_workpath_bar import WorkPathBar
 
 from QSS import QSSFiles, qss_formatter
 from .types import WindowConfig
+from utils import app_dir
 
-CONFIG_PATH = 'configs/window.json'
+CONFIG_PATH = app_dir()/'configs'/'window.json'
 
 class ChatWindow(WindowBase):
     def __init__(self, filename: str):

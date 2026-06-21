@@ -10,7 +10,7 @@
 # ----------------- 窗口的基本设置 ----------------------------------------
 window_base:
   window_background_color: rgba(64, 64, 64, 255)          # 窗口背景色
-  background_filter_color: rgba(0, 0, 0, 192)             # 背景滤镜色（模态框遮罩）
+  background_filter_color: rgba(0, 0, 0, 0.85)             # 背景滤镜色（模态框遮罩）
   text_color: rgba(255, 255, 255, 255)                    # 默认文字颜色
   button_hover_color: rgba(255, 255, 255, 64)             # 普通按钮悬停色
   button_pressed_color: rgba(255, 255, 255, 128)          # 普通按钮按下的颜色
