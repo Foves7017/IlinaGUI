@@ -194,7 +194,8 @@ class ConversionItem(QWidget):
 
     def update_message(self, message: IlinaMessage):
         if self.node_message.role == 'tool':
-            self.contentBlock.setMarkdown('**'+ message.tool_name +'**\n\n'+message.content[:50]+('...' if len(message.content) > 50 else ''))
+            # self.contentBlock.setMarkdown('**'+ message.tool_name +'**\n\n'+message.content[:50]+('...' if len(message.content) > 50 else ''))
+            self.contentBlock.setMarkdown('**'+ message.tool_name +'**\n\n'+message.content)
         else:
             self.contentBlock.setMarkdown(message.content)
         self.reasoningContentBlock.setMarkdown(message.reasoning_content)

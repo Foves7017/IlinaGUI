@@ -17,6 +17,10 @@ class MarkdownBrowser(QTextEdit):
         )
         self.setEnabled(False)
     
+    def setMarkdown(self, markdown: str) -> None:
+        markdown = markdown.replace('\n', '\n\n')
+        return super().setMarkdown(markdown)
+
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key() in (Qt.Key.Key_Escape,):
             self.hotkey_cancel.emit()

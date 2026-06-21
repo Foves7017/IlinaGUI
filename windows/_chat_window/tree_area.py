@@ -20,7 +20,7 @@ class TreeArea(QGraphicsView):
         # 场景和视角
         self.tree_scene = QGraphicsScene()
         super().__init__(self.tree_scene)
-        qss_formatter.add_widget(self, 'TreeView', QSSFiles.chat_window)
+        qss_formatter.add_widget(self, 'TreeArea', QSSFiles.chat_window)
 
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)

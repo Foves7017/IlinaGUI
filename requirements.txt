@@ -1,3 +1,4 @@
+setuptools<82
 PySide6
 FovesLog
 FovesConfig

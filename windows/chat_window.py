@@ -13,6 +13,7 @@ from ._chat_window.title_label import TitleLabel
 from ._chat_window.state_label import StateLabel, StateLabelText
 from ._chat_window.invoke_worker import InvokeWorker
 from ._chat_window.tree_float_window import TreeFloatWindow
+from ._chat_window.talk_workpath_bar import WorkPathBar
 
 from QSS import QSSFiles, qss_formatter
 from .types import WindowConfig
@@ -54,10 +55,9 @@ class ChatWindow(WindowBase):
         """ 初始化引擎并设置各种东西 """
 
         self.engine = Engine(self.filename)
-        self.title_label.label = self.engine.name
-        self.title_label.label_edited.connect(lambda name:self.engine.set_name(name))
-        self.tree_area.draw(self.engine.readonly_root_node, self.engine.readonly_leaves)
-        self.scroll_area.add_messages(*self.engine.message_list)
+        self.title_label.label = self.engine.name  # 标题
+        self.workpath_label.workpath = self.engine.workpath  # 工作目录
+        self.scroll_area.add_messages(*self.engine.message_list)  # 消息
 
         # 引擎加载好之后载入 QSS
         self.loading_label.setText(f'Now Loading...\n\n界面创建完成\nIlina Engine 已启动\n正在载入样式')
@@ -76,6 +76,8 @@ class ChatWindow(WindowBase):
         self.tree_area.tree_node_left.connect(self.on_tree_node_left)
         # 点击状态标签重载
         self.state_label.pressed.connect(self.reload_style)
+        # 编辑标题重命名
+        self.title_label.label_edited.connect(lambda name:self.engine.set_name(name))
         # 发送按钮
         self.input_area.send.connect(self.on_send_pressed)
         # 浮动窗口的几个按钮
@@ -122,6 +124,10 @@ class ChatWindow(WindowBase):
             QSizePolicy.Policy.Expanding,
         )
         talk_area_layout = QVBoxLayout(self.talk_area)
+
+        # 创建工作目录显示条
+        self.workpath_label = WorkPathBar()
+        talk_area_layout.addWidget(self.workpath_label)
 
         # 创建滚动区
         self.scroll_area = ScrollArea()

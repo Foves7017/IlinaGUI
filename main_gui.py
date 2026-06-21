@@ -1,17 +1,19 @@
 # 启动 Magager 的入口
+from FovesLog import setup_log
+setup_log()
+
+
 import os
 import sys
 import datetime 
 from PySide6.QtWidgets import QApplication
 
-from FovesLog import setup_log
 from windows import ChatWindow
 from QSS.color_loader import QSSFormatter
 
 DEFAULT_SAVE_PATH = r'.ilina'
 
 if __name__ == '__main__':
-    setup_log()
 
     app_argv = sys.argv[:]
 

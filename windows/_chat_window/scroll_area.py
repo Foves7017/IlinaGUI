@@ -1,5 +1,6 @@
 import logging
 from uuid import UUID
+from PySide6.QtGui import QWheelEvent
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QSizePolicy
 from PySide6.QtCore import Qt, Signal
 from IlinaEngine import IlinaMessage
@@ -27,14 +28,22 @@ class ScrollArea(QScrollArea):
 
         # UUID 到 Item 的记录表
         self.uuid_to_conversion_item: dict[UUID, ConversionItem] = {}
+        self.last_item: UUID   # 最下面的节点
     
     def scroll_to_node(self, target: UUID):
         """ 滚动到指定节点 """
         try:
             item = self.uuid_to_conversion_item[target]
+            # print(f'Item 下边界：{item.geometry().bottom()} 上边界：{item.geometry().top()}')
             self.ensureWidgetVisible(item)
+            # # 如果item底部在屏幕外，就滚动上去
+            # if item.geometry().bottom() > self.verticalScrollBar().value():
+            #     self.verticalScrollBar().setValue(item.geometry().bottom())
         except KeyError:
             pass
+    
+    def wheelEvent(self, arg__1: QWheelEvent) -> None:
+        return super().wheelEvent(arg__1)
             
     def update_item(self, uuid: UUID, new_message: IlinaMessage):
         """ 更新节点 """
@@ -51,6 +60,7 @@ class ScrollArea(QScrollArea):
             new_item.edit_node.connect(self.start_edit_node.emit)
             new_item.edit_finished.connect(self.edit_finished.emit)
             new_item.invoke_from_node.connect(self.invoke_from_node.emit)
+            self.last_item = uuid
 
     def clear(self):
         """ 清空显示 """
@@ -62,8 +72,8 @@ class ScrollArea(QScrollArea):
         content = QWidget()
         qss_formatter.add_widget(content, 'ScrollContent', QSSFiles.chat_window)
         self.content_layout = QVBoxLayout(content)
+        self.content_layout.setSpacing(0)
         self.content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 顶部对齐，不拉伸
-        self.content_layout.addStretch()  # 底部留白，内容不足时不会散开
         return content
     
     def __contains__(self, item: UUID|ConversionItem):
