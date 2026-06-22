@@ -11,7 +11,22 @@ from utils import app_dir
 
 DEFAULT_SAVE_PATH = r'.ilina'
 
+import ctypes
+
+if getattr(sys, "frozen", False):
+    ctypes.windll.kernel32.AllocConsole()
+    ctypes.windll.user32.ShowWindow(
+        ctypes.windll.kernel32.GetConsoleWindow(),
+        0
+    )
+
 if __name__ == '__main__':
+    if sys.stdout is None:
+        sys.stdout = open(os.devnull, "w")
+
+    if sys.stderr is None:
+        sys.stderr = open(os.devnull, "w")
+
     setup_log(log_floder=app_dir()/'logs')
     
     app_argv = sys.argv[:]

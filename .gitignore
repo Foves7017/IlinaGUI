@@ -10,6 +10,10 @@ IlinaGUI
 IlinaGUI.exe
 build.bat
 hide_*
+
+*.zip
+右键菜单.reg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
