@@ -3,7 +3,7 @@ from IlinaEngine import Engine, NodeEvent, NodeEventTypes, IlinaMessage
 from FovesConfig import ConfigLoader
 from PySide6.QtGui import QMouseEvent
 from PySide6.QtCore import Qt, QByteArray, Slot, QTimer, QThread, QEvent
-from PySide6.QtWidgets import QSplitter, QSizePolicy, QWidget, QVBoxLayout
+from PySide6.QtWidgets import QSplitter, QSizePolicy, QWidget, QVBoxLayout, QMessageBox
 
 from ._window_base import WindowBase
 from ._chat_window.tree_area import TreeArea
@@ -55,16 +55,21 @@ class ChatWindow(WindowBase):
     def _setup_engine(self):
         """ 初始化引擎并设置各种东西 """
 
-        self.engine = Engine(self.filename)
+        try:
+            self.engine = Engine(self.filename)
+        except Exception as e:
+            self.loading_label.setText(f"Ilina Engine 报告了一个错误\n{repr(e)}")
+            return
+
         self.title_label.label = self.engine.name  # 标题
         self.workpath_label.workpath = self.engine.workpath  # 工作目录
         self.scroll_area.add_messages(*self.engine.message_list)  # 消息
 
         # 引擎加载好之后载入 QSS
         self.loading_label.setText(f'Now Loading...\n\n界面创建完成\nIlina Engine 已启动\n正在载入样式')
-        QTimer.singleShot(0, lambda: self.reload_style(self.after_fitst_reload_style))
+        QTimer.singleShot(0, lambda: self.reload_style(self.after_first_reload_style))
 
-    def after_fitst_reload_style(self):
+    def after_first_reload_style(self):
         """ 第一次重载 QSS 的回调 """
         self.loading_label.deleteLater()
         # 有这个函数主要是因为这个 ↓ 放在设置引擎的时候线条颜色会不对
@@ -91,6 +96,10 @@ class ChatWindow(WindowBase):
         self.scroll_area.edit_finished.connect(self.finished_edit_node)
         self.scroll_area.invoke_from_node.connect(self.invoke_from_node)
 
+        # 遍历Engine的警告列表，弹窗警告
+        for item in self.engine.warning_list:
+            self.log.warning(f'Ilina Engine 发出警告：{item}')
+            QMessageBox.warning(self, 'Ilina Engine 发出的警告', item)
 
     def _setup_splitter(self):
         """ 创建分割区域 """
