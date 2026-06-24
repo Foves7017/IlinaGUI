@@ -1,3 +1,4 @@
+from typing import Callable
 from uuid import UUID
 from IlinaEngine import Engine, NodeEvent, NodeEventTypes, IlinaMessage
 from FovesConfig import ConfigLoader
@@ -27,7 +28,7 @@ class ChatWindow(WindowBase):
         super().__init__()
         self.loading_label.setText(f'Now Loading...\n\n正在创建界面')
         QTimer.singleShot(1, self._setup_content)
-    
+
     def _setup_content(self):
         """ 加载界面元素，之所以专门整个函数是为了放在 singleShot 里，其实我也不知道这样能不能加载更快
         """
@@ -72,16 +73,17 @@ class ChatWindow(WindowBase):
     def after_first_reload_style(self):
         """ 第一次重载 QSS 的回调 """
         self.loading_label.deleteLater()
-        # 有这个函数主要是因为这个 ↓ 放在设置引擎的时候线条颜色会不对
+
+        # 有这个函数最开始是因为这个 ↓ 放在设置引擎的时候线条颜色会不对
         self.tree_area.draw(self.engine.readonly_root_node, self.engine.readonly_leaves)
 
         # 连接各种事件
-        # 显示浮动窗口
+        # 树状图的事件
         self.tree_area.tree_node_click.connect(self.on_tree_node_click)
         self.tree_area.tree_node_enter.connect(self.on_tree_node_enter)
         self.tree_area.tree_node_left.connect(self.on_tree_node_left)
         # 点击状态标签重载
-        self.state_label.pressed.connect(self.reload_style)
+        self.state_label.pressed.connect(self.on_reload_clicked)
         # 编辑标题重命名
         self.title_label.label_edited.connect(lambda name:self.engine.set_name(name))
         # 发送按钮
@@ -191,16 +193,21 @@ class ChatWindow(WindowBase):
         if call_event._type == NodeEventTypes.CREATED:  # 创建节点
             self.scroll_area.add_messages([call_event.node.uuid], [call_event.node.message])
             self.tree_area.draw(self.engine.readonly_root_node, self.engine.readonly_leaves)
-            # self.scroll_to_node(call_event.node.uuid)
 
         elif call_event._type == NodeEventTypes.UPDATED:
             self.scroll_area.update_item(call_event.node.uuid, call_event.node.message)
-            self.scroll_area.scroll_to_node(call_event.node.uuid)
+            self.scroll_area.target_scroll_uuid = None
+            
 
         elif call_event._type == NodeEventTypes.ERROR:
             self.scroll_area.add_messages([call_event.node.uuid], [call_event.node.message])
             self.log.error(f'引擎产出了错误事件：\n{call_event.node.message.content}')
             return
+
+    @Slot()
+    def on_reload_clicked(self):
+        self.reload_style()
+        self.tree_area.draw(self.engine.readonly_root_node, self.engine.readonly_leaves)
 
     @Slot()
     def on_splitter_moved(self):  # 记录Splitter的位置
@@ -223,7 +230,10 @@ class ChatWindow(WindowBase):
         try:
             self.tree_float_window.Clicked = True
             self.tree_float_window.set_node(uuid, self.engine.get_message_by_uuid(uuid))
-            self.scroll_area.scroll_to_node(uuid)
+
+            if uuid in self.scroll_area:
+                self.scroll_area.target_scroll_uuid = uuid
+                self.scroll_area.auto = True
         except IndexError:
             pass
     
@@ -236,7 +246,9 @@ class ChatWindow(WindowBase):
             new_node_uuid = self.engine.send(user_message)
             self.scroll_area.add_messages([new_node_uuid], [user_message])
             self.tree_area.draw(self.engine.readonly_root_node, self.engine.readonly_leaves)
-            QTimer.singleShot(0, lambda: self.scroll_area.scroll_to_node(new_node_uuid))
+            self.scroll_area.target_scroll_uuid = new_node_uuid
+            self.scroll_area.auto = True
+            # QTimer.singleShot(0, self.scroll_area.scroll_to_bottom)
             self.input_area.text = ''
             self.start_invoke()
             return True
@@ -268,6 +280,9 @@ class ChatWindow(WindowBase):
             if self.engine.get_message_by_uuid(target_uuid).role != 'assistant':
                 uuid_index += 1
             self.scroll_area.add_messages(uuids[:uuid_index], messages[:uuid_index])
+        
+        self.scroll_area.target_scroll_uuid = target_uuid
+        self.scroll_area.auto = True
     
     @Slot()
     def delete_node(self, target: UUID):
@@ -298,7 +313,6 @@ class ChatWindow(WindowBase):
         self.scroll_area.start_edit(target)
         self.tree_float_window.hide()
         self.tree_float_window.Clicked = False
-        QTimer.singleShot(0, lambda: self.scroll_area.scroll_to_node(target))
 
     @Slot()
     def finished_edit_node(self, target: UUID, new_message: IlinaMessage, invoke: bool):

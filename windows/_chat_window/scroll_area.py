@@ -1,12 +1,15 @@
 import logging
 from uuid import UUID
-from PySide6.QtGui import QWheelEvent
+from FovesConfig import ConfigLoader
+from PySide6.QtGui import QPaintEvent, QWheelEvent
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QSizePolicy
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QTimer
 from IlinaEngine import IlinaMessage
 
+from utils import app_dir
 from .conversion_item import ConversionItem
 from QSS import QSSFiles, qss_formatter
+from ..types import WindowConfig
 
 class ScrollArea(QScrollArea):
     start_edit_node = Signal(UUID)
@@ -17,10 +20,14 @@ class ScrollArea(QScrollArea):
         super().__init__()
         self.log = logging.getLogger('滚动区域')
         qss_formatter.add_widget(self, 'ScrollArea', QSSFiles.chat_window)
-
         self.setWidgetResizable(True)  # 内容 widget 随滚动区域自适应宽度
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        # 是否自动滚动
+        self.auto: bool = True
+        # 自动滚动的目标
+        self.target_scroll_uuid: UUID|None = None
 
         # 滚动区域内部的内容容器
         self.content = self._new_content()
@@ -30,21 +37,42 @@ class ScrollArea(QScrollArea):
         self.uuid_to_conversion_item: dict[UUID, ConversionItem] = {}
         self.last_item: UUID   # 最下面的节点
     
-    def scroll_to_node(self, target: UUID):
-        """ 滚动到指定节点 """
-        try:
-            item = self.uuid_to_conversion_item[target]
-            # print(f'Item 下边界：{item.geometry().bottom()} 上边界：{item.geometry().top()}')
-            self.ensureWidgetVisible(item)
-            # # 如果item底部在屏幕外，就滚动上去
-            # if item.geometry().bottom() > self.verticalScrollBar().value():
-            #     self.verticalScrollBar().setValue(item.geometry().bottom())
-        except KeyError:
-            pass
-    
     def wheelEvent(self, arg__1: QWheelEvent) -> None:
+        self.auto = False
         return super().wheelEvent(arg__1)
-            
+
+    def paintEvent(self, arg__1: QPaintEvent) -> None:
+        self.content_layout.setContentsMargins(0, 0, 0, self.height()*2)  # 添加空白
+
+        if self.auto:
+            speed = ConfigLoader(app_dir()/'configs'/'window.json', WindowConfig).readonly().scroll_speed
+            value = self.verticalScrollBar().value()         
+
+            if self.target_scroll_uuid:
+                # 滚动到目标
+                itempos = self.uuid_to_conversion_item[self.target_scroll_uuid].geometry().top()
+
+                if itempos < value - speed:
+                    self.verticalScrollBar().setValue(value - speed)
+                elif itempos > value + speed:
+                    self.verticalScrollBar().setValue(value + speed)
+                elif value - speed < itempos < value + speed:
+                    self.verticalScrollBar().setValue(itempos)
+                else:
+                    self.auto = False
+            else:
+                self.content_layout.setContentsMargins(0, 0, 0, 0)  # 添加空白
+                itempos = self.uuid_to_conversion_item[self.last_item].geometry().bottom()
+                if value + self.height() < itempos:
+                    if value + self.height() - itempos < speed:
+                        self.verticalScrollBar().setValue(itempos)
+                    else:
+                        self.verticalScrollBar().setValue(value + speed)
+
+        super().paintEvent(arg__1)
+        self.update()
+
+
     def update_item(self, uuid: UUID, new_message: IlinaMessage):
         """ 更新节点 """
         item = self.uuid_to_conversion_item[uuid]
@@ -53,7 +81,7 @@ class ScrollArea(QScrollArea):
     def add_messages(self, uuids: list[UUID], messages: list[IlinaMessage]):
         """ 向区域内添加节点 """
         for uuid, message in zip(uuids, messages):
-            self.log.info(f'添加节点：{uuid}')
+            self.log.debug(f'添加节点：{uuid}')
             new_item = ConversionItem(uuid, message)
             self.content_layout.addWidget(new_item)  # 添加到布局
             self.uuid_to_conversion_item[uuid] = new_item  # 添加到查找表
@@ -73,6 +101,7 @@ class ScrollArea(QScrollArea):
         qss_formatter.add_widget(content, 'ScrollContent', QSSFiles.chat_window)
         self.content_layout = QVBoxLayout(content)
         self.content_layout.setSpacing(0)
+        self.content_layout.setContentsMargins(0, 0, 0, self.height()*2)
         self.content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 顶部对齐，不拉伸
         return content
     

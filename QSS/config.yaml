@@ -10,10 +10,10 @@ chat_window:
   float_window_fixed_height: 150
 window_base:
   background_images: 
-   - 'C:/Users/chihu/Pictures/Aoi/ev_sy32_0101.png'
-   - "C:/Users/chihu/Pictures/Aoi/CG_TM01_0101__base.png"
-   - "C:/Users/chihu/Pictures/Aoi/ev_ya31_0101.png"
-   - "C:/Users/chihu/Pictures/Aoi/large_ev116b.png"
+  #  - 'C:/Users/chihu/Pictures/Aoi/ev_sy32_0101.png'
+  #  - "C:/Users/chihu/Pictures/Aoi/CG_TM01_0101__base.png"
+  #  - "C:/Users/chihu/Pictures/Aoi/ev_ya31_0101.png"
+  #  - "C:/Users/chihu/Pictures/Aoi/large_ev116b.png"
    - "C:/Users/chihu/Pictures/Aoi/CG_AO03_0201__base.png"
-   - "C:/Users/chihu/Pictures/Aoi/cg_na01_0101__base.png"
-   - "C:/Users/chihu/Pictures/Aoi/large_ev401d.png"
+  #  - "C:/Users/chihu/Pictures/Aoi/cg_na01_0101__base.png"
+  #  - "C:/Users/chihu/Pictures/Aoi/large_ev401d.png"

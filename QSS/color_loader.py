@@ -28,9 +28,10 @@ from utils import app_dir
 class WindowBaseColors(BaseModel):
     window_background_color: str = 'rgba(64, 64, 64, 255)'          # 窗口背景色
     background_filter_color: str = 'rgba(0, 0, 0, 192)'             # 背景滤镜色（模态框遮罩）
-    text_color: str = 'rgba(255, 255, 255, 255)'                    # 默认文字颜色
-    button_hover_color: str = 'rgba(255, 255, 255, 64)'             # 普通按钮悬停色
-    button_pressed_color: str = 'rgba(255, 255, 255, 128)'          # 普通按钮按下的颜色
+    default_text_color: str = 'rgba(255, 255, 255, 255)'                    # 默认文字颜色
+    titlebar_button_hover_color: str = 'rgba(255, 255, 255, 64)'             # 普通按钮悬停色
+    titlebar_button_pressed_color: str = 'rgba(255, 255, 255, 128)'          # 普通按钮按下的颜色
+
     close_button_hover_color: str = 'rgba(240, 62, 62, 255)'        # 关闭按钮悬停色
     close_button_pressed_color: str = 'rgba(189, 48, 48, 255)'      # 关闭按钮按下的颜色
 
@@ -48,24 +49,41 @@ class ChatWindowColors(BaseModel):
     input_button_pressed_background_color: str = 'rgba(50, 50, 100, 255)'           # 发送按钮按下颜色
     conversion_item_editing_background_color: str = 'rgba(255, 255, 255, 64)'  # 对话条目编辑背景色
     conversion_item_reasoning_content_color: str = "#DDDDDD"    # 对话条目思考文字颜色
-    role_user_color: str = '#C4A84A'                                 # 用户角色颜色
-    role_assistant_color: str = '#7E9BB5'                            # 助手角色颜色
-    role_tool_color: str = '#8AA38D'                                 # 工具角色颜色
-    role_system_color: str = '#A8A8A8'                               # 系统角色颜色
-    role_error_color: str = "#FFB0B0"                                # 错误角色颜色
 
+    role_user_normal_color: str = '#FFFF80'                           # 用户角色浅色
+    role_assistant_normal_color: str = '#8080ff'                      # 助手角色浅色
+    role_tool_normal_color: str = '#80FF80'                           # 工具角色浅色
+    role_system_normal_color: str = '#808080'                         # 系统角色浅色
+    role_error_normal_color: str = '#FF8080'                          # 错误角色浅色
 
-    # ----- 斩杀线 ----
+    role_user_extra_color: str = '#808040'                            # 用户角色深色
+    role_assistant_extra_color: str = '#404080'                       # 助手角色深色
+    role_tool_extra_color: str = '#408040'                            # 工具角色深色
+    role_system_extra_color: str = '#808080'                          # 系统角色深色
+    role_error_extra_color: str = '#804040'                           # 错误角色深色
 
-    role_label_text_color: str = "#DDDDDD"                           # 角色标签文字颜色
+    tree_line_color: str = '#404040'
 
-    input_button_color: str = '#303030'                              # 输入按钮颜色
+    state_label_background_color: str = 'rgba(255, 255, 255, 64)'     # 状态标签背景色
+    state_label_hover_color: str = 'rgba(255, 255, 255, 128)'         # 状态标签悬停色
+    state_idle_color: str = '#FFF'                                     # IDLE 状态颜色
+    state_transport_color: str = '#AFA'                                # TRANSPORTING 状态颜色
+    state_connect_color: str = '#FFA'                                  # CONNECTING 状态颜色
 
-    role_line_color: str = '#FFFFFF'                                 # 角色分割线颜色
+    conversion_item_button_hover_color: str = 'rgba(240, 240, 255, 64)'       # 对话条目按钮悬停色
+    conversion_item_button_pressed_color: str = 'rgba(240, 240, 255, 128)'    # 对话条目按钮按下色
+
+    title_edit_background_color: str = 'rgba(240, 240, 255, 64)'
+
+    work_path_color: str = "rgba(240, 240, 255, 64)"
 
     float_window_background_color: str = '#000000'                   # 浮动窗口背景色
     float_window_background_alpha: int = 128                         # 浮动窗口背景透明度 (0-255)
     float_window_shadow_start_alpha: int = 40                        # 浮动窗口阴影起始透明度
+    float_window_split_color: str = 'rgba(240, 240, 255, 128)'
+    float_window_button_text_color: str = 'rgba(240, 240, 255, 1)'
+    float_window_button_hover_color: str = 'rgba(240, 240, 255, 64)'
+    float_window_button_pressed_color: str = 'rgba(240, 240, 255, 128)'
 
 
 class Colors(BaseModel):
@@ -200,14 +218,6 @@ class QSSFormatter:
         else:
             return self.sheets[name]
     
-    def get_role_color(self, role: IlinaMessageRoles):
-        if role == 'assistant':
-            return self.colors.chat_window.role_assistant_color
-        elif role == 'user':
-            return self.colors.chat_window.role_user_color
-        elif role == 'tool':
-            return self.colors.chat_window.role_tool_color
-        elif role == 'error':
-            return self.colors.chat_window.role_error_color
-        elif role == 'system':
-            return self.colors.chat_window.role_system_color
+    def get_role_color(self, role: IlinaMessageRoles, is_extra: bool = False):
+        suffix = 'extra_color' if is_extra else 'normal_color'
+        return getattr(self.colors.chat_window, f'role_{role}_{suffix}')

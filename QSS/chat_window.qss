@@ -27,7 +27,7 @@
 /* -------------------- 输入区域 ---------------------------- */
 #InputArea {
     background-color: {{input_area_backgournd_color}};
-    border: 1px solid {{general_split_line_color}};
+    border: 1px solid {{input_area_boarder_color}};
     border-radius: 8px;
 }
 
@@ -63,23 +63,28 @@
 }
 
 #ConversionItemRoleLabel[role="user"] {
-    color: {{role_user_color}};
-    border-right: 2px solid {{role_user_color}};
+    color: {{role_user_normal_color}};
+    border-right: 2px solid {{role_user_extra_color}};
 }
 
 #ConversionItemRoleLabel[role="assistant"] {
-    color: {{role_assistant_color}};
-    border-right: 2px solid {{role_assistant_color}};
+    color: {{role_assistant_normal_color}};
+    border-right: 2px solid {{role_assistant_extra_color}};
 }
 
 #ConversionItemRoleLabel[role="tool"] {
-    color: {{role_tool_color}};
-    border-right: 2px solid {{role_tool_color}};
+    color: {{role_tool_normal_color}};
+    border-right: 2px solid {{role_tool_extra_color}};
 }
 
 #ConversionItemRoleLabel[role="system"] {
-    color: {{role_system_color}};
-    border-right: 2px solid {{role_system_color}};
+    color: {{role_system_normal_color}};
+    border-right: 2px solid {{role_system_extra_color}};
+}
+
+#ConversionItemRoleLabel[role="error"] {
+    color: {{role_error_normal_color}};
+    border-right: 2px solid {{role_error_extra_color}};
 }
 
 /* 内容正文框 */
@@ -95,12 +100,12 @@
 /* 思考内容框 */
 #ConversionItemReasoningContentBlock {
     font-size: 10px;
-    color: {{role_label_text_color}};
+    color: {{conversion_item_reasoning_content_color}};
 }
 
 #ConversionItemReasoningContentBlock[role="tool"] {
     font-size: 15px;
-    color: {{role_tool_color}};
+    color: {{role_tool_extra_color}};
     font-family: 'Maple Mono NF CN';
 }
 
@@ -112,11 +117,11 @@
 }
 
 #ConversionItemButton:hover {
-    background-color: rgba(255, 255, 255, 64);
+    background-color: {{conversion_item_button_hover_color}};
 }
 
 #ConversionItemButton:pressed {
-    background-color: rgba(255, 255, 255, 128);
+    background-color: {{conversion_item_button_pressed_color}};
     padding-top: 8px;
     padding-bottom: 0px;
 }
@@ -128,15 +133,15 @@
     font-weight: bold;
     font-size: 18px;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 64);
+    background-color: {{title_edit_background_color}};
 }
 
 #TitleLabel:read-only {
-    background-color: rgba(255, 255, 255, 0);
+    background-color: rgba(0, 0, 0, 0);
 }
 
 #TitleLabel:hover {
-    background-color: rgba(255, 255, 255, 64);
+    background-color: {{title_edit_background_color}};
 }
 
 /* --------------------状态标志---------------------------- */
@@ -146,69 +151,66 @@
     padding: 2px 8px;
     border-radius: 8px;
     font-family: 'Maple Mono NF CN';
-    background-color: rgba(255, 255, 255, 64);
+    background-color: {{state_label_background_color}};
     font-weight: bold;
 }
 
 #StateLabel:hover {
-    background-color: rgba(255, 255, 255, 128);
+    background-color: {{state_label_hover_color}};
 }
 
 #StateLabel[state='空闲'] {
-    color: #FFF;
+    color: {{state_idle_color}};
 }
 
 #StateLabel[state='连接API服务中...'] {
-    color: #FFA;
+    color: {{state_connect_color}};
 }
 
 #StateLabel[state='传输信息流中...'] {
-    color: #AFA;
+    color: {{state_transport_color}};
 }
 
 /* --------------------工作目录栏---------------------------- */
 
 #WorkPathBar {
     /* border-bottom: 1px solid {{general_split_line_color}}; */
-    color: rgba(255, 255, 255, 64);
+    color: {{work_path_color}};
 }
 
 /* --------------------浮动窗口---------------------------- */
 
 
-#LayoutNodeFloatWindowRole {
-    background-color: rgba(255, 255, 255, 0);
+#TreeFloatWindowRole {
     font-weight: bold;
     font-family: 'Maple Mono NF CN';
     font-size: 14px;
     padding-right: 5px;
+    color: {{float_window_button_text_color}};
 }
 
-#LayoutNodeFloatWindowContent {
+#TreeFloatWindowContent {
     margin: 0px 10px;
+    color: {{float_window_button_text_color}};
 }
 
 #FloatWindowFunctionArea {
-    border-top: 1px solid rgba(255, 255, 255, 128);
-    border-bottom: 1px solid rgba(255, 255, 255, 128);
+    border-top: 1px solid {{float_window_split_color}};
+    border-bottom: 1px solid {{float_window_split_color}};
 }
 
 #FloatWindowFunctionButton {
     padding: 8px 0px;
     border-radius: 8px;
     font-weight: bold;
-    color: rgba(255, 255, 255, 192)
+    color: {{float_window_button_text_color}};
 }
 
 #FloatWindowFunctionButton:hover {
-    background-color: rgba(255, 255, 255, 64);   
+    background-color: {{float_window_button_hover_color}};   
 }
 
 #FloatWindowFunctionButton:pressed {
     padding-top: 12px;
-    background-color: rgba(255, 255, 255, 128);   
-}
-
-#FloatWindowFunctionButton:disabled {
-    color: rgba(255, 255, 255, 64)
+    background-color: {{float_window_button_pressed_color}};   
 }

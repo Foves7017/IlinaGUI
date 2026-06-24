@@ -30,12 +30,12 @@ class TreeFloatWindow(QWidget):
 
         # 显示角色的标题
         self.role_label = QLabel()
-        qss_formatter.add_widget(self.role_label, 'LayoutNodeFloatWindowRole', QSSFiles.chat_window)
+        qss_formatter.add_widget(self.role_label, 'TreeFloatWindowRole', QSSFiles.chat_window)
 
         # 显示内容
         self.content_label = QLabel()
         self.content_label.setWordWrap(True)
-        qss_formatter.add_widget(self.content_label, 'LayoutNodeFloatWindowContent', QSSFiles.chat_window)
+        qss_formatter.add_widget(self.content_label, 'TreeFloatWindowContent', QSSFiles.chat_window)
 
         # 设置宽度
         self.content_label.setFixedWidth(qss_formatter.config.chat_window.float_window_fixed_width)
@@ -161,7 +161,7 @@ class TreeFloatWindow(QWidget):
             )
 
             # 阴影颜色 = 角色色 + 当前层透明度
-            shadow_color = QColor(qss_formatter.get_role_color(self.role))
+            shadow_color = QColor(qss_formatter.get_role_color(self.role, True))
             shadow_color.setAlpha(alpha)
 
             # 阴影层不需要描边，只需要填充

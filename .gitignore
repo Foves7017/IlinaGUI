@@ -10,6 +10,8 @@ IlinaGUI
 IlinaGUI.exe
 build.bat
 hide_*
+reinstallEngine.bat
+docs/色卡.pptx
 
 *.zip
 右键菜单.reg

@@ -91,13 +91,13 @@ class WindowBase(QtWidgets.QWidget):
         window_layout.setContentsMargins(0, 0, 0, 0)
 
         # 背景滤镜
-        backgournd_filter_widget = QtWidgets.QWidget()
-        backgournd_filter_widget.setObjectName('BackgroundFilter')
-        qss_formatter.add_widget(backgournd_filter_widget, 'BackgroundFilter', QSSFiles.window_base)
-        window_layout.addWidget(backgournd_filter_widget)
+        self.backgournd_filter_widget = QtWidgets.QWidget()
+        self.backgournd_filter_widget.setObjectName('BackgroundFilter')
+        qss_formatter.add_widget(self.backgournd_filter_widget, 'BackgroundFilter', QSSFiles.window_base)
+        window_layout.addWidget(self.backgournd_filter_widget)
 
         # 设置根布局
-        self.root_layout = QtWidgets.QVBoxLayout(backgournd_filter_widget)
+        self.root_layout = QtWidgets.QVBoxLayout(self.backgournd_filter_widget)
         self.root_layout.setContentsMargins(0, 0, 0, 0)
         self.root_layout.setSpacing(0)
 
@@ -328,6 +328,15 @@ class WindowBase(QtWidgets.QWidget):
         delete_list = []
         try:
             qss_formatter.reload(scheme)
+
+            # 根据背景图片的状态设置 BackgroundFilter 和 WindowBase 的属性
+            if qss_formatter.config.window_base.background_images:
+                self.setProperty('BackgroundImage', "True")
+                self.backgournd_filter_widget.setProperty('BackgroundImage', "True")
+            else:
+                self.setProperty('BackgroundImage', "False")
+                self.backgournd_filter_widget.setProperty('BackgroundImage', "False")
+
             for widget in qss_formatter.qss_table:
                 try:
                     self.log.debug(f'正在为 {widget.widget.objectName()}({type(widget.widget)}) 加载 QSS：{widget.qss_filename}')
@@ -336,6 +345,9 @@ class WindowBase(QtWidgets.QWidget):
                     self.log.warning(f'遇到了出错的组件，正在添加到删除列表...错误：{type(e)}:{e}')
                     delete_list.append(widget)
             qss_formatter.delete_qss_infos(delete_list)
+
+            
+
         except AttributeError:
             self.log.warning(f'跳过了加载 QSS')
         # 如果指定了回调函数就调用

@@ -1,20 +1,34 @@
 /* -------------------- 全局属性 ---------------------------- */
 * {
     background-color: rgba(0, 0, 0, 0);
-    color: {{text_color}};
+    color: {{default_text_color}};
 }
 
 /* -------------------- 窗口设置 ---------------------------- */
-#WindowBase {
+#WindowBase[BackgroundImage="True"] {
     background-repeat: no-repeat;
     background-position: center;
     background-image: url("{{background_images}}");
+}
+
+#WindowBase[BackgroundImage="False"] {
     background-color: {{window_background_color}};
 }
 
 /* -------------------- 背景滤镜 ---------------------------- */
-#BackgroundFilter {
-    background-color: {{background_filter_color}};
+#BackgroundFilter[BackgroundImage="True"] {
+    /* background-color: {{background_filter_color}}; */
+    background: qradialgradient(
+        cx:0.5, cy:0.5,
+        radius:0.5,
+        fx:0.5, fy: 0.5,
+        stop:0.5 {{background_filter_color}},    
+        stop:1 {{window_background_color}}           
+    );
+}
+
+#BackgroundFilter[BackgroundImage="False"] {
+    background-color: rgba(0, 0, 0, 0);
 }
 
 /* -------------------- 按钮设置 ---------------------------- */
@@ -41,10 +55,10 @@ QPushButton#TitleBarClose:pressed {
 
 /* 其他按钮 */
 QPushButton#TitleBarButton:hover {
-    background-color: {{button_hover_color}};
+    background-color: {{titlebar_button_hover_color}};
 }
 QPushButton#TitleBarButton:pressed {
-    background-color: {{button_pressed_color}};
+    background-color: {{titlebar_button_pressed_color}};
 }
 
 /* -------------------- 标题栏设置 ---------------------------- */

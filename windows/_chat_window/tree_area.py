@@ -81,7 +81,7 @@ class TreeArea(QGraphicsView):
             for child in node.children:
                 line = QGraphicsLineItem(table[node].x(), table[node].y(), table[child].x(), table[child].y())
                 line.setPen(QPen(
-                    QColor(qss_formatter.colors.chat_window.role_line_color),
+                    QColor(qss_formatter.colors.chat_window.tree_line_color),
                     qss_formatter.config.chat_window.tree_node_line_width)
                 )
                 line.setZValue(0)

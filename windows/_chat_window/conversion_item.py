@@ -176,7 +176,14 @@ class ConversionItem(QWidget):
         root_layout.addWidget(self.roleLabel)
         root_layout.addWidget(self.contentArea)
 
+        # 更新消息
         self.update_message(message)
+
+        # 如果是 tool 和 system 就直接折叠, assistant 的思考也折叠
+        if self.node_message.role in ['tool', 'system']:
+            self.contentBlock.expand = False
+        elif self.node_message.role == 'assistant':
+            self.reasoningContentBlock.expand = False
         
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
@@ -256,11 +263,6 @@ class ConversionItem(QWidget):
         else:
             self.contentBlock.setMarkdown(message.content)
             self.reasoningContentBlock.setMarkdown(message.reasoning_content)
-        # 如果是 tool 和 system 就直接折叠, assistant 的思考也折叠
-        if self.node_message.role in ['tool', 'system']:
-            self.contentBlock.expand = False
-        elif self.node_message.role == 'assistant':
-            self.reasoningContentBlock.expand = False
         QTimer.singleShot(0, self.update_hide)
     
     def update_hide(self) -> None:
