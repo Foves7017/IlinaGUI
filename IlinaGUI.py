@@ -3,6 +3,7 @@ from FovesLog import setup_log
 import os
 import sys
 import datetime 
+from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import QApplication
 
 from windows import ChatWindow
@@ -20,6 +21,7 @@ if getattr(sys, "frozen", False):
         0
     )
 
+
 if __name__ == '__main__':
     if sys.stdout is None:
         sys.stdout = open(os.devnull, "w")
@@ -35,6 +37,12 @@ if __name__ == '__main__':
         app_argv += ['-platform', 'windows:darkmode=2']
 
     app = QApplication(app_argv) 
+
+    # 加载字体
+    font_dir = app_dir() / 'fonts'
+    for ext in ('*.ttf', '*.otf'):
+        for font_file in font_dir.glob(ext):
+            QFontDatabase.addApplicationFont(str(font_file))
 
     # 创建窗口和信号连接
     if len(sys.argv) > 1:

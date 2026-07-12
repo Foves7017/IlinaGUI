@@ -38,7 +38,6 @@ class MarkdownBrowser(QTextEdit):
             self.setFixedHeight(min(size.height(), self.max_collapse_height))
 
     def setMarkdown(self, markdown: str) -> None:
-        # markdown = markdown.replace('\n', '\n\n')
         res = super().setMarkdown(markdown)
         self.document().setTextWidth(self.viewport().width() or self.width())  # 手动触发刷新内容确保高度计算
         return res

@@ -89,14 +89,10 @@ class TreeArea(QGraphicsView):
                 line_to_children(child)
         line_to_children(root_node)
 
-        # 固定场景矩形，确保原点 (0,0) 处于视图中心
+        # 为场景矩形四周添加滚动余量
         rect = self.tree_scene.itemsBoundingRect()
-        half_w = max(abs(rect.left()), abs(rect.right())) + 50
-        half_h = max(abs(rect.top()), abs(rect.bottom())) + 50
-        self.tree_scene.setSceneRect(
-            QRectF(-half_w, -half_h, half_w * 2, half_h * 2)
-        )
-        self.centerOn(0, 0)
+        rect.adjust(-50, -50, 50, 50)
+        self.tree_scene.setSceneRect(rect)
 
         # 绑定信号
         self.tree_scene.selectionChanged.connect(self.on_selection_changed)

@@ -63,6 +63,7 @@ class ChatWindow(WindowBase):
             return
 
         self.title_label.label = self.engine.name  # 标题
+        self.setWindowTitle(f'{self.engine.name} - Ilina GUI')
         self.workpath_label.workpath = self.engine.workpath  # 工作目录
         self.scroll_area.add_messages(*self.engine.message_list)  # 消息
 

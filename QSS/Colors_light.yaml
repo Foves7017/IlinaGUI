@@ -10,7 +10,7 @@
 # ----------------- 窗口的基本设置 ----------------------------------------
 window_base:
   window_background_color: '#f0f0ff'          # 窗口背景色
-  background_filter_color: rgba(240, 240, 255, 0.5)             # 背景滤镜色
+  background_filter_color: rgba(240, 240, 255, 0.75)             # 背景滤镜色
   default_text_color: '#080810'                  # 默认文字颜色
   titlebar_button_hover_color: '#c0c0ff'             # 普通标题栏按钮悬停色
   titlebar_button_pressed_color: '#9999cc'          # 普通标题栏按钮按下的颜色
