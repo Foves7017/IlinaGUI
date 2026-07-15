@@ -1,7 +1,0 @@
-IlinaEngine
-PySide6
-FovesLog
-FovesConfig
-pyyaml
-pyperclip
-pywin32

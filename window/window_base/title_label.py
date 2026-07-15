@@ -1,23 +1,23 @@
 import re
+
 from PySide6.QtGui import QFontMetrics
 from PySide6.QtCore import QEvent, QObject, Qt, Signal, QSize, QTimer
 from PySide6.QtWidgets import QLineEdit, QSizePolicy
 
-from QSS import qss_formatter, QSSFiles
-
 class TitleLabel(QLineEdit):
-    """ 作为标题栏的 TextEdit，在ChatWindow用来作为显示对话名，并支持双击修改 """
+    """ 作为标题栏的 TextEdit，支持双击修改 """
     label_edited = Signal(str)
+
     def __init__(self):
         super().__init__()
-        qss_formatter.add_widget(self, 'TitleLabel', QSSFiles.chat_window)
+        self.setObjectName('TitleLabel')
         self.setReadOnly(True)
         self.installEventFilter(self)
         self.setSizePolicy(
             QSizePolicy.Policy.Fixed,
             self.sizePolicy().verticalPolicy()
         )
-        self.saved_text: str = ''
+        self.label = 'WindowTitle'
 
     def sizeHint(self) -> QSize:
         base = super().sizeHint()
@@ -29,11 +29,11 @@ class TitleLabel(QLineEdit):
 
     @property
     def label(self) -> str:
-        return self.saved_text
+        return self._label
 
     @label.setter
     def label(self, value: str):
-        self.saved_text = value
+        self._label = value
         self.setText(value)
         self.updateGeometry()
 
@@ -41,20 +41,28 @@ class TitleLabel(QLineEdit):
         if obj is self:
             if event.type() == QEvent.Type.KeyPress:
                 if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
-                    self.saved_text = self.text()
-                    self.saved_text = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '', self.saved_text)
-                    self.label_edited.emit(self.saved_text)
+                    self._label = self.text()
+                    self._label = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '', self._label)
+                    self.label_edited.emit(self._label)
                     self.setReadOnly(True)
-                    self.label = self.saved_text
+                    self.label = self._label
                     return True
                 elif event.key() in (Qt.Key.Key_Escape,):
-                    self.setText(self.saved_text)
+                    self.setText(self._label)
                     self.setReadOnly(True)
                     return True
+                
             elif event.type() == QEvent.Type.MouseButtonDblClick:
                 self.setReadOnly(False)
                 QTimer.singleShot(0, lambda: (self.setFocus(), self.selectAll()))
                 return True
+            
             elif event.type() == QEvent.Type.Paint:
                 self.updateGeometry()
+            
+            elif event.type() == QEvent.Type.FocusOut:
+                self.setText(self._label)
+                self.setReadOnly(True)
+                return True
+
         return super().eventFilter(obj, event)

@@ -4,20 +4,21 @@
     color: {{default_text_color}};
 }
 
-/* -------------------- 窗口设置 ---------------------------- */
-#WindowBase[BackgroundImage="True"] {
+/* -------------------- 窗口设置 ---------------------------- 
+#WindowBase[BackgroundImage=true] {
     background-repeat: no-repeat;
     background-position: center;
     background-image: url("{{background_images}}");
 }
 
-#WindowBase[BackgroundImage="False"] {
+#WindowBase[BackgroundImage=false] {
     background-color: {{window_background_color}};
 }
+*/
 
-/* -------------------- 背景滤镜 ---------------------------- */
-#BackgroundFilter[BackgroundImage="True"] {
-    /* background-color: {{background_filter_color}}; */
+/* -------------------- 背景滤镜 ---------------------------- 
+#BackgroundFilter[BackgroundImage=true] {
+    /* background-color: {{background_filter_color}}; 
     background: qradialgradient(
         cx:0.5, cy:0.5,
         radius:0.5,
@@ -25,11 +26,12 @@
         stop:0.5 {{background_filter_color}},    
         stop:1 {{window_background_color}}           
     );
-}
+} 
 
-#BackgroundFilter[BackgroundImage="False"] {
+#BackgroundFilter[BackgroundImage=false] {
     background-color: rgba(0, 0, 0, 0);
 }
+*/
 
 /* -------------------- 按钮设置 ---------------------------- */
 
@@ -38,7 +40,9 @@ QPushButton {
     margin: 0px;
     border: 0px;
     padding: 0px 10px;
-    margin-bottom: 5px;
+    font-family: "Segoe Fluent Icons";
+    font-size: 10pt;
+    color: {{default_text_color}}
 }
 QPushButton:pressed {
     padding-top: 10px;
@@ -66,4 +70,28 @@ QPushButton#TitleBarButton:pressed {
     margin: 0;
     border: 0;
     padding: 0;
+}
+
+
+/* -------------------- 加载标签设置 ---------------------------- */
+#LoadingLabel {
+    font-size: 48px;
+}
+
+/* --------------------对话标题---------------------------- */
+
+#TitleLabel {
+    font-family: 'Maple Mono NF CN';
+    font-weight: bold;
+    font-size: 18px;
+    border-radius: 8px;
+    background-color: {{title_edit_background_color}};
+}
+
+#TitleLabel:read-only {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#TitleLabel:hover {
+    background-color: {{title_edit_background_color}};
 }

@@ -1,28 +1,23 @@
-# =====================================================================
-#  Colors_dark.yaml  —  深色主题颜色配置
-# =====================================================================
-# [说明] 此文件与 color_loader.py 中的默认值保持同步。
-#        当在 Python 中新增颜色字段时，应同步更新本文件。
-# [格式] rgba 颜色 → rgba(R, G, B, A)
-#        十六进制  → '#RRGGBB'（需加引号，否则 # 被视为注释）
-# =====================================================================
 
 dark:
-  # ----------------- 窗口的基本设置 ----------------------------------------
   window_background_color: '#080810'          # 窗口背景色
   background_filter_color: rgba(0, 0, 0, 0.75)             # 背景滤镜色
   default_text_color: '#f0f0ff'                    # 默认文字颜色
   titlebar_button_hover_color: '#202040'             # 普通标题栏按钮悬停色
   titlebar_button_pressed_color: '#46468c'          # 普通标题栏按钮按下的颜色
+  title_edit_background_color: rgba(240, 240, 255, 0.25)  # 标题编辑时背景色
 light:
   window_background_color: '#f0f0ff'          # 窗口背景色
-  background_filter_color: rgba(240, 240, 255, 0.75)             # 背景滤镜色
+  background_filter_color: rgba(240, 240, 255, 0.6)             # 背景滤镜色
   default_text_color: '#080810'                  # 默认文字颜色
   titlebar_button_hover_color: '#c0c0ff'             # 普通标题栏按钮悬停色
   titlebar_button_pressed_color: '#9999cc'          # 普通标题栏按钮按下的颜色
+  title_edit_background_color: rgba(128, 128, 128, 64)  # 标题编辑时背景色
+
 general:
   close_button_hover_color: rgba(240, 62, 62, 255)        # 关闭按钮悬停色
   close_button_pressed_color: rgba(189, 48, 48, 255)      # 关闭按钮按下的颜色
+  titlebar_height: 48   # 标题栏高度
   background_images: 
     - 'C:/Users/chihu/Pictures/Aoi/ev_sy32_0101.png'
     - "C:/Users/chihu/Pictures/Aoi/CG_TM01_0101__base.png"
