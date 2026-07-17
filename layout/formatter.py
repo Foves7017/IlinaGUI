@@ -55,6 +55,9 @@ class Formatter:
     ---
 
     热重载：调用 reload 方法
+
+    ---
+
     创建 QWidget：
       1. widget = QWidget()
       2. 调用formatter的add_qss_widget(widget, qss_filename, objname)

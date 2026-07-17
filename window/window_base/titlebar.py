@@ -1,6 +1,6 @@
 from FovesConfig import ConfigLoader
 
-from PySide6.QtCore import Signal, QTimer
+from PySide6.QtCore import Signal, QTimer, Qt
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QSizePolicy
 
 from layout.formatter import Formatter
@@ -61,7 +61,8 @@ class Titlebar(QWidget):
 
         self.setFixedHeight(formatter.titlebar_height)
         self.setObjectName('TitleBar')
-        self.setContentsMargins(0, 0, 0, 0)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.setContentsMargins(0, 0, 0, 2)  # QSS 离指定了底部边框高度是 1px，所以这里底部需要留出空间，否则按钮会盖住边框
 
         # 窗口是否最大化的标志
         self._is_max: bool = False

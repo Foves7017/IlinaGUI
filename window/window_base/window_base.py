@@ -54,7 +54,7 @@ class WindowBase(QWidget):
 
         # formatter
         self.formatter = Formatter(self._get_scheme())
-        # self.formatter.add_qss_widget(self, WINDOWBASE_QSS_PATH)
+        self.formatter.add_qss_widget(self, WINDOWBASE_QSS_PATH)
 
         # 背景部件
         background_qqwidget = QQuickWidget()
@@ -67,7 +67,6 @@ class WindowBase(QWidget):
 
         # 标题栏
         self.titlebar = Titlebar(self.formatter)
-        self.formatter.add_qss_widget(self.titlebar, WINDOWBASE_QSS_PATH)
         self.titlebar.close_button_pushed.connect(self._on_close)
         self.titlebar.min_button_pushed.connect(self._on_min)
         self.titlebar.max_button_pushed.connect(self._on_max)
@@ -76,7 +75,7 @@ class WindowBase(QWidget):
         self.root_layout = QVBoxLayout(background_qqwidget)
         self.root_layout.setContentsMargins(0, 0, 0, 0)
         self.root_layout.addWidget(self.titlebar)
-        self.root_layout.addStretch(1)
+        self.root_layout.setSpacing(0)
 
         # 加载配置 
         with ConfigLoader(CONFIG_PATH, WindowConfig) as conf:

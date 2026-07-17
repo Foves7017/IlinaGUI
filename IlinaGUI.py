@@ -1,11 +1,14 @@
 import sys
+from pathlib import Path
+
 from FovesLog import setup_log
+from FovesConfig import ConfigLoader
 
 from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import QApplication
 
 from utils import app_dir
-from window.window_base.window_base import WindowBase
+from window.manager.manager import Manager
 
 if __name__ == "__main__":
     setup_log(log_floder=app_dir()/'logs')
@@ -24,7 +27,7 @@ if __name__ == "__main__":
             QFontDatabase.addApplicationFont(str(font_file))
 
     # 创建窗口和信号连接
-    form = WindowBase()
+    form = Manager(sys.argv)
     app.styleHints().colorSchemeChanged.connect(form._on_color_scheme_changed)
     form.show()
 

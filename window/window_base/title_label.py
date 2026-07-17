@@ -26,7 +26,7 @@ class TitleLabel(QLineEdit):
         text_width = fm.horizontalAdvance(text) + 30
         width = text_width
         return QSize(width, base.height())
-
+ 
     @property
     def label(self) -> str:
         return self._label
