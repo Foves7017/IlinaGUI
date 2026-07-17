@@ -4,9 +4,12 @@ from logging import getLogger
 from FovesConfig import ConfigLoader
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QHBoxLayout
+from PySide6.QtGui import QEnterEvent
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel
+from PySide6QtAds import CDockManager, CDockWidget, DockWidgetArea
 
 from .consts import *
+from .dock_manager import DockManager
 from .active_bar import ActiveBar
 from global_consts import *
 from window.window_base.window_base import WindowBase
@@ -42,3 +45,28 @@ class Manager(WindowBase):
         self.active_bar = ActiveBar(self.formatter)
         self.content_layout.addWidget(self.active_bar)
         self.formatter.add_qml_widget(self.active_bar, ACTIVEBAR_QML_PATH)
+
+        # 设置右侧的 docker
+        self.dock_manager = DockManager()
+        self.content_layout.addWidget(self.dock_manager)
+        self.formatter.add_qss_widget(self.dock_manager, SPLITTER_QSS_PATH)
+
+        label = QLabel("Hello, QtAds!")
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        dock = CDockWidget("我的面板")
+        dock.setWidget(label)
+
+        label1 = QLabel("Hello, QtAds!")
+        label1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        dock1 = CDockWidget("我的面板1")
+        dock1.setWidget(label1)
+
+        self.dock_manager.addDockWidget(
+            DockWidgetArea.LeftDockWidgetArea, dock1
+        )
+
+        self.dock_manager.addDockWidget(
+            DockWidgetArea.LeftDockWidgetArea, dock
+        )
