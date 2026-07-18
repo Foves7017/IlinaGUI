@@ -1,2 +1,4 @@
+dark:
+  tab_label_active_background_color: rgba(255, 255, 255, 64)
 general:
   active_bar_width: 64

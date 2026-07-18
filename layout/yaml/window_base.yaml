@@ -14,7 +14,7 @@ light:
   titlebar_button_hover_color: '#c0c0ff'             # 普通标题栏按钮悬停色
   titlebar_button_pressed_color: '#9999cc'          # 普通标题栏按钮按下的颜色
   title_edit_background_color: rgba(128, 128, 128, 64)  # 标题编辑时背景色
-  general_splitter_color: '#080810'  # 通用边框颜色
+  general_splitter_color: '#0808c0'  # 通用边框颜色
 general:
   close_button_hover_color: rgba(240, 62, 62, 255)        # 关闭按钮悬停色
   close_button_pressed_color: rgba(189, 48, 48, 255)      # 关闭按钮按下的颜色

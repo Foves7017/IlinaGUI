@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from FovesConfig import ConfigLoader
 
 from PySide6.QtGui import QMouseEvent, QShowEvent, QIcon, QImage, QPixmap
-from PySide6.QtCore import Qt, QPoint, Slot, QTimer, QByteArray, QEvent
+from PySide6.QtCore import QObject, Qt, QPoint, Slot, QTimer, QByteArray, QEvent
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QSizePolicy, QHBoxLayout
 from PySide6.QtQuickWidgets import QQuickWidget
 
@@ -13,9 +13,8 @@ from utils import app_dir
 from layout.formatter import Formatter
 from .titlebar import Titlebar
 from .consts import *
+from window.manager.consts import *
 
-import win32gui
-import win32con
 from ctypes import windll, byref, sizeof
 from ctypes.wintypes import HWND, INT
 from win32con import (
@@ -43,29 +42,25 @@ from win32con import (
 
 class WindowBaseII(QWidget):
     """ 窗口基类 """
-    def __init__(self, window_widget: QWidget|None=None):
-        super().__init__()
+    def __init__(self, container):
+        super().__init__(container)
 
-        if window_widget is None:
-            self.window_widget: QWidget = self
-        else:
-            self.window_widget: QWidget = window_widget
+        self.container = container
 
-            
         self._dragging = False
 
         # 日志
         self.log = logging.getLogger(f'窗口基类')
 
         # 设置窗口图标
-        self.window_widget.setWindowIcon(QIcon(str(app_dir()/'images'/'ico.ico')))
-        # self.window_widget.setWindowFlags(Qt.WindowType.FramelessWindowHint )
-        self.window_widget.setWindowFlags(Qt.WindowType.CustomizeWindowHint | Qt.WindowType.Window)
-        self.window_widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
+        self.container.setWindowIcon(QIcon(str(app_dir()/'images'/'ico.ico')))
+        # self.container.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
+        self.container.setWindowFlags(Qt.WindowType.CustomizeWindowHint | Qt.WindowType.Window)
+        self.container.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         # formatter
         self.formatter = Formatter(self._get_scheme())
-        self.formatter.add_qss_widget(self, WINDOWBASE_QSS_PATH)
+        self.formatter.add_qss_widget(self, [WINDOWBASE_QSS_PATH, DOCK_MANAGER_QSS_PATH])
 
         # 背景部件
         background_qqwidget = QQuickWidget()
@@ -91,108 +86,56 @@ class WindowBaseII(QWidget):
         # 加载配置 
         with ConfigLoader(CONFIG_PATH, WindowConfig) as conf:
             self.edge_board = conf.edge_board
-            # # 如果存储文件里没有缓存窗口状态，就默认启动到屏幕中心
-            # if conf.window_state == '':
-            #     self.window_widget.resize(*conf.default_size)
-            #     fg = self.window_widget.frameGeometry()  # 获取屏幕几何的副本
-            #     fg.moveCenter(self.window_widget.screen().availableGeometry().center())  # 把几何的副本放到中间
-            #     self.window_widget.move(fg.topLeft())  # 真的移动窗口
-            # else:
-            #     self.window_widget.restoreGeometry(QByteArray.fromBase64(conf.window_state.encode()))
-            #     # 最大化关闭之后，再启动依然是最大化窗口。但此时如果拖动标题栏，不会立刻恢复较小的窗口，而是等到第二次拖动的时候才解决
-            #     # 虽然其实不是很影响，但希望有一天能解决吧
-            # self.titlebar.is_max = conf.window_maxed
 
-        # 启用 DWM
-        # if self.titlebar.is_max:
-        #     self.__disable_dwm()
-        # else:
         # QTimer.singleShot(0, self.__enable_dwm)
 
     def showEvent(self, event: QShowEvent) -> None:
         # 设置鼠标追踪
-        self.window_widget.setMouseTracking(True)
+        self.container.setMouseTracking(True)
         self.setMouseTracking(True)
-        for child in self.window_widget.findChildren(QWidget):
+        for child in self.container.findChildren(QWidget):
             child.setMouseTracking(True)
         # 下一帧触发重载
-        self.reload_style()
+        QTimer.singleShot(0, self.reload_style)
         return super().showEvent(event)
 
-    def __enable_dwm(self):
-        """为无边框窗口启用 DWM 阴影、Aero Snap、最大化动画（仅 Windows）
+    # def __enable_dwm(self):
+    #     """为无边框窗口启用 DWM 阴影、Aero Snap、最大化动画（仅 Windows）
 
-        原理：FramelessWindowHint 去掉了 WS_CAPTION，导致 DWM 不画阴影、不触发 Snap。
-        这里手动加回 WS_CAPTION 等样式，再通过 WM_NCCALCSIZE 吞掉视觉上的非客户区，
-        从而获得「有边框窗口的一切 DWM 福利，但肉眼看不到边框」的效果。
-        """
-        if sys.platform != "win32":
-            return
-
-        hwnd = HWND(int(self.window_widget.winId()))
-        # hwnd = HWND(int(self.window_widget.winId()))
-        GWL_STYLE = -16
-
-        # 1. 读取当前窗口样式，补上 Snap / 阴影所需的标志
-        style = windll.user32.GetWindowLongPtrW(hwnd, GWL_STYLE)
-        style |= WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
-        windll.user32.SetWindowLongPtrW(hwnd, GWL_STYLE, style)
-
-        # 2. 强制 DWM 重新读取窗口样式（否则不会立即生效）
-        windll.user32.SetWindowPos(
-            hwnd, 0, 0, 0, 0, 0,
-            SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE
-        )
-
-        # 3. 告知 DWM：使用扩展边框渲染策略
-        DWMWA_NCRENDERING_POLICY = 2
-        DWMNCRP_ENABLED = INT(2)
-        windll.dwmapi.DwmSetWindowAttribute(
-            hwnd,
-            DWMWA_NCRENDERING_POLICY,
-            byref(DWMNCRP_ENABLED),
-            sizeof(DWMNCRP_ENABLED)
-        )
-
-        # 4. 将边框向客户区延伸 1px（肉眼不可见，但 DWM 会据此画阴影）
-        margins = MARGINS(0, 0, 1, 0)
-        windll.dwmapi.DwmExtendFrameIntoClientArea(hwnd, byref(margins))
-    
-    # def __disable_dwm(self):
-    #     """移除通过 __enable_dwm 添加的 DWM 扩展效果（仅 Windows）
-
-    #     与 __enable_dwm 相反：移除 WS_CAPTION 等样式、禁用 DWM 扩展边框渲染、
-    #     恢复 DwmExtendFrameIntoClientArea 为零。
+    #     原理：FramelessWindowHint 去掉了 WS_CAPTION，导致 DWM 不画阴影、不触发 Snap。
+    #     这里手动加回 WS_CAPTION 等样式，再通过 WM_NCCALCSIZE 吞掉视觉上的非客户区，
+    #     从而获得「有边框窗口的一切 DWM 福利，但肉眼看不到边框」的效果。
     #     """
     #     if sys.platform != "win32":
     #         return
 
-    #     hwnd = HWND(int(self.window_widget.window().winId()))
+    #     hwnd = HWND(int(self.container.winId()))
+    #     # hwnd = HWND(int(self.window_widget.winId()))
     #     GWL_STYLE = -16
 
-    #     # 1. 读取当前窗口样式，移除 Snap / 阴影所需的标志
+    #     # 1. 读取当前窗口样式，补上 Snap / 阴影所需的标志
     #     style = windll.user32.GetWindowLongPtrW(hwnd, GWL_STYLE)
-    #     style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX)
+    #     style |= WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
     #     windll.user32.SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
-    #     # 2. 强制 DWM 重新读取窗口样式
+    #     # 2. 强制 DWM 重新读取窗口样式（否则不会立即生效）
     #     windll.user32.SetWindowPos(
     #         hwnd, 0, 0, 0, 0, 0,
     #         SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE
     #     )
 
-    #     # 3. 告知 DWM：禁用扩展边框渲染策略
+    #     # 3. 告知 DWM：使用扩展边框渲染策略
     #     DWMWA_NCRENDERING_POLICY = 2
-    #     DWMNCRP_DISABLED = INT(1)
+    #     DWMNCRP_ENABLED = INT(2)
     #     windll.dwmapi.DwmSetWindowAttribute(
     #         hwnd,
     #         DWMWA_NCRENDERING_POLICY,
-    #         byref(DWMNCRP_DISABLED),
-    #         sizeof(DWMNCRP_DISABLED)
+    #         byref(DWMNCRP_ENABLED),
+    #         sizeof(DWMNCRP_ENABLED)
     #     )
 
-    #     # 4. 将边框延伸恢复为 0
-    #     margins = MARGINS(0, 0, 0, 0)
+    #     # 4. 将边框向客户区延伸 1px（肉眼不可见，但 DWM 会据此画阴影）
+    #     margins = MARGINS(0, 0, 1, 0)
     #     windll.dwmapi.DwmExtendFrameIntoClientArea(hwnd, byref(margins))
 
     def _get_scheme(self) -> Literal['light', 'dark']:
@@ -207,7 +150,6 @@ class WindowBaseII(QWidget):
     
     def nativeEvent(self, eventType: QByteArray, message: int):
         """处理 Windows 原生消息，补齐无边框窗口缺失的系统行为"""
-        # print('clo')
         if sys.platform != "win32":
             return False, 0
 
@@ -252,13 +194,13 @@ class WindowBaseII(QWidget):
         if event.button() == Qt.MouseButton.LeftButton:  # 按下左键
             if self.edge_board < event.pos().y() < self.formatter.titlebar_height: 
                 # 检查标题栏拖动
-                child = self.window_widget.childAt(event.pos())
+                child = self.container.childAt(event.pos())
                 if child and child.objectName() == 'TitleBar' and not self._dragging:
                     # 浮动窗口的拖拽由 WM_NCHITTEST → HTCAPTION 走系统原生拖拽，
                     # 不需要（也无法）走 startDragging 自定义拖拽路径
-                    if not hasattr(self.window_widget, 'startDragging'):
+                    if not hasattr(self.container, 'startDragging'):
                         # 直接用 Windows 原生窗口拖动
-                        window_handle = self.window_widget.window().windowHandle()
+                        window_handle = self.container.window().windowHandle()
                         if window_handle:
                             window_handle.startSystemMove()
                         event.accept()
@@ -266,7 +208,7 @@ class WindowBaseII(QWidget):
 
                     if self.titlebar.is_max:
                         # 记录当前鼠标在最大化窗口中的比例
-                        geo = self.window_widget.frameGeometry()
+                        geo = self.container.frameGeometry()
                         rx = event.pos().x() / geo.width()
                         ry = event.pos().y() / geo.height()
 
@@ -275,11 +217,11 @@ class WindowBaseII(QWidget):
 
                         def after_restore():
                             # 窗口已经变回正常大小，按相同比例算出新的拖拽偏移
-                            new_w = self.window_widget.width()   # 注意：用 width()，不是 frameGeometry()
-                            new_h = self.window_widget.height()
+                            new_w = self.container.width()   # 注意：用 width()，不是 frameGeometry()
+                            new_h = self.container.height()
                             offset = QPoint(int(rx * new_w), int(ry * new_h))
 
-                            self.window_widget.startDragging(offset, self.window_widget.size(), self)
+                            self.container.startDragging(offset, self.container.size(), self)
                             self.grabMouse()
                             self._dragging = True
 
@@ -287,33 +229,29 @@ class WindowBaseII(QWidget):
 
                     else:
                         # 非最大化：直接转换坐标
-                        offset = self.mapTo(self.window_widget, event.pos())
-                        self.window_widget.startDragging(offset, self.window_widget.size(), self)
+                        offset = self.mapTo(self.container, event.pos())
+                        self.container.startDragging(offset, self.container.size(), self)
                         self.grabMouse()
                         self._dragging = True
-                    # 获取 QWindow 句柄并启动系统级拖动
-                    # window_handle = self.window_widget.window().windowHandle()
-                    # if window_handle:
-                    #     else:
-                        # window_handle.startSystemMove()
 
                     event.accept()
                     return
             else:
                 # 检查边缘缩放，如果是全屏就不检查
                 if not self.titlebar.is_max:
-                    # print('1')
-                    window_handle = self.window_widget.window().windowHandle()
+                    print('1')
+                    window_handle = self.container.window().windowHandle()
                     edge = self._get_resize_edge(event.pos())
                     if edge and window_handle:
-                        window_handle.startSystemResize(edge)
-                        # print(2)
+                        ret = window_handle.startSystemResize(edge)
+                        print(ret)
                     event.accept()
                     return
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
+        print(event.pos())
         if self._dragging:
-            self.window_widget.moveFloating()
+            self.container.moveFloating()
         # 如果是全屏就不改变指针
         if not self.titlebar.is_max:
             edges = self._get_resize_edge(event.pos())
@@ -337,7 +275,7 @@ class WindowBaseII(QWidget):
         return super().mouseMoveEvent(event)
     
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
-        self.window_widget.finishDragging()
+        self.container.finishDragging()
         self._dragging = False
         self.releaseMouse()
         return super().mouseReleaseEvent(event)
@@ -383,23 +321,20 @@ class WindowBaseII(QWidget):
     
     @Slot()
     def _on_close(self):
-        # with ConfigLoader(CONFIG_PATH, WindowConfig) as conf:
-        #     conf.window_state = self.saveGeometry().toBase64().data().decode()  # pyright: ignore[reportAttributeAccessIssue]
-        #     conf.window_maxed = self.titlebar.is_max
-        self.window_widget.close()
+        self.container.close()
     
     @Slot()
     def _on_min(self):
-        self.window_widget.showMinimized()
+        self.container.showMinimized()
     
     @Slot()
     def _on_max(self):
         if self.titlebar.is_max:
-            self.window_widget.showNormal()
+            self.container.showNormal()
             # self.__enable_dwm()
             self.titlebar.is_max = False
         else:
-            self.window_widget.showMaximized()
+            self.container.showMaximized()
             # self.__disable_dwm()
             self.titlebar.is_max = True
 

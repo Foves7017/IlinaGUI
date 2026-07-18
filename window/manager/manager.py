@@ -3,8 +3,7 @@ from logging import getLogger
 
 from FovesConfig import ConfigLoader
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QEnterEvent
+from PySide6.QtCore import Qt, QByteArray, QTimer
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PySide6QtAds import CDockManager, CDockWidget, DockWidgetArea
 
@@ -49,24 +48,30 @@ class Manager(WindowBase):
         # 设置右侧的 docker
         self.dock_manager = DockManager()
         self.content_layout.addWidget(self.dock_manager)
-        self.formatter.add_qss_widget(self.dock_manager, SPLITTER_QSS_PATH)
+        self.formatter.add_qss_widget(self.dock_manager, DOCK_MANAGER_QSS_PATH)
 
-        label = QLabel("Hello, QtAds!")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        for i in range(10):
+            label1 = QLabel(f"Hello, QtAds! {i}")
+            label1.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        dock = CDockWidget("我的面板")
-        dock.setWidget(label)
+            dock1 = CDockWidget(f"我的面板 {i}")
+            dock1.setWidget(label1)
 
-        label1 = QLabel("Hello, QtAds!")
-        label1.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        dock1 = CDockWidget("我的面板1")
-        dock1.setWidget(label1)
-
-        self.dock_manager.addDockWidget(
-            DockWidgetArea.LeftDockWidgetArea, dock1
-        )
-
-        self.dock_manager.addDockWidget(
-            DockWidgetArea.LeftDockWidgetArea, dock
-        )
+            self.dock_manager.addDockWidget(
+                DockWidgetArea.LeftDockWidgetArea, dock1
+            )
+        
+        # 从配置中恢复 dock 状态（延迟到事件循环就绪后执行，避免 showEvent 时 container 未就绪）
+        config = ConfigLoader(MANAGER_CONFIG_PATH, ManagerConfig).readonly()
+        if config.dock_state.encode():
+            QTimer.singleShot(0, lambda ctx=config: (
+                self.dock_manager.restoreState(
+                    QByteArray.fromBase64(ctx.dock_state.encode())
+                )
+            ))
+    
+    def _on_close(self):
+        with ConfigLoader(MANAGER_CONFIG_PATH, ManagerConfig) as config:
+            config.dock_state = self.dock_manager.saveState().toBase64().data().decode()
+        self.dock_manager.close.emit()
+        return super()._on_close()

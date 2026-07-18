@@ -1,0 +1,46 @@
+* {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0)
+}
+
+ads--CDockWidgetTab QLabel {
+    font-family: "Maple Mono NF CN";
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+ads--CDockWidgetTab[activeTab="true"] QLabel {
+    color: {{window_background_color}}
+}
+
+ads--CDockWidgetTab[activeTab="true"] {
+    background-color: {{general_splitter_color}};
+    /* border-radius: 4px; */
+}
+
+
+ads--CDockWidgetTab[activeTab="false"]:hover {
+    background-color: {{title_edit_background_color}};
+    /* border-radius: 4px; */
+}
+
+ads--CDockContainerWidget {
+    border-left: 1px solid {{general_splitter_color}};
+}
+
+ads--CDockAreaTitleBar {
+    /* border-bottom: 1px solid {{general_splitter_color}}; */
+    /* border-top: 1px solid {{general_splitter_color}}; */
+}
+
+ads--CDockWidget {
+
+}
+
+ads--CDockSplitter::handle {
+    background-color: {{general_splitter_color}};
+    height: 1px;
+    width: 1px;
+}
