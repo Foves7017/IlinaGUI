@@ -1,0 +1,8 @@
+dark:
+  title_path_text_color: '#666666'
+  tree_view_current_background_color: '#40F0F0FF'
+  tree_view_expand_arrow_color: "#CCCCCC"
+light:
+  title_path_text_color: '#333333'
+  tree_view_current_background_color: '#40808080'
+  tree_view_expand_arrow_color: "#333333"

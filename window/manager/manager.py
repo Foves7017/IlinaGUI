@@ -4,13 +4,16 @@ from logging import getLogger
 from FovesConfig import ConfigLoader
 
 from PySide6.QtCore import Qt, QByteArray, QTimer
+from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel
 from PySide6QtAds import CDockManager, CDockWidget, DockWidgetArea
 
 from .consts import *
-from .dock_manager import DockManager
 from .active_bar import ActiveBar
+from .dock_manager import DockManager
 from global_consts import *
+from plugins.plugin_manager import PluginManager
+from window.window_base.titlebar import TitlebarButton
 from window.window_base.window_base import WindowBase
 
 class Manager(WindowBase):
@@ -30,9 +33,11 @@ class Manager(WindowBase):
                 self.workspace = path.parent
         
         self.log.info(f'工作区路径：{self.workspace}')
+
         # 设置标题
         self.titlebar.titlelabel.label = self.workspace.stem
         self.titlebar.titlelabel.setDisabled(True)
+        self.setWindowTitle(self.workspace.stem + ' - Ilina GUI')
 
         # 设置内容 widget
         self.content = QWidget()
@@ -45,33 +50,25 @@ class Manager(WindowBase):
         self.content_layout.addWidget(self.active_bar)
         self.formatter.add_qml_widget(self.active_bar, ACTIVEBAR_QML_PATH)
 
+        # 初始化插件系统
+        self.plugin_manager = PluginManager(self.formatter)
+
         # 设置右侧的 docker
-        self.dock_manager = DockManager()
+        CDockManager.setConfigFlag(CDockManager.FloatingContainerHasWidgetTitle, False)
+        self.dock_manager = DockManager(self.workspace, self.plugin_manager, self.formatter)
         self.content_layout.addWidget(self.dock_manager)
         self.formatter.add_qss_widget(self.dock_manager, DOCK_MANAGER_QSS_PATH)
+        self.dock_manager.setProperty('mainWindow', 'true')
+        # self.titlebar.reload_button.pressed.connect(lambda: self.dock_manager.create_dock('file_manager'))
 
-        for i in range(10):
-            label1 = QLabel(f"Hello, QtAds! {i}")
-            label1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+    def showEvent(self, event: QShowEvent) -> None:
+        # QTimer.singleShot(0, self.dock_manager.load_saved_dock)
+        self.dock_manager.load_saved_dock()
+        return super().showEvent(event)
 
-            dock1 = CDockWidget(f"我的面板 {i}")
-            dock1.setWidget(label1)
-
-            self.dock_manager.addDockWidget(
-                DockWidgetArea.LeftDockWidgetArea, dock1
-            )
-        
-        # 从配置中恢复 dock 状态（延迟到事件循环就绪后执行，避免 showEvent 时 container 未就绪）
-        config = ConfigLoader(MANAGER_CONFIG_PATH, ManagerConfig).readonly()
-        if config.dock_state.encode():
-            QTimer.singleShot(0, lambda ctx=config: (
-                self.dock_manager.restoreState(
-                    QByteArray.fromBase64(ctx.dock_state.encode())
-                )
-            ))
-    
     def _on_close(self):
         with ConfigLoader(MANAGER_CONFIG_PATH, ManagerConfig) as config:
             config.dock_state = self.dock_manager.saveState().toBase64().data().decode()
         self.dock_manager.close.emit()
+        self.dock_manager.save_created_docks()
         return super()._on_close()

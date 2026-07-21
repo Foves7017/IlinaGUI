@@ -76,6 +76,9 @@ class WindowBaseII(QWidget):
         self.titlebar.close_button_pushed.connect(self._on_close)
         self.titlebar.min_button_pushed.connect(self._on_min)
         self.titlebar.max_button_pushed.connect(self._on_max)
+        self.titlebar.titlelabel.label_edited.connect(
+            lambda x: self.container.setWindowTitle(x + ' - IlinaGUI')
+        )
 
         # 根布局
         self.root_layout = QVBoxLayout(background_qqwidget)
@@ -95,6 +98,8 @@ class WindowBaseII(QWidget):
         self.setMouseTracking(True)
         for child in self.container.findChildren(QWidget):
             child.setMouseTracking(True)
+        # 设置窗口标题
+        self.container.setWindowTitle(self.titlebar.titlelabel.label + ' - IlinaGUI')
         # 下一帧触发重载
         QTimer.singleShot(0, self.reload_style)
         return super().showEvent(event)
@@ -239,17 +244,14 @@ class WindowBaseII(QWidget):
             else:
                 # 检查边缘缩放，如果是全屏就不检查
                 if not self.titlebar.is_max:
-                    print('1')
                     window_handle = self.container.window().windowHandle()
                     edge = self._get_resize_edge(event.pos())
                     if edge and window_handle:
                         ret = window_handle.startSystemResize(edge)
-                        print(ret)
                     event.accept()
                     return
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        print(event.pos())
         if self._dragging:
             self.container.moveFloating()
         # 如果是全屏就不改变指针

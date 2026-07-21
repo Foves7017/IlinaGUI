@@ -1,3 +1,4 @@
+from uuid import UUID
 from utils import app_dir
 from pydantic import BaseModel
 
@@ -8,3 +9,4 @@ MANAGER_CONFIG_PATH = app_dir()/'configs'/'manager_window.json'
 
 class ManagerConfig(BaseModel):
     dock_state: str = ''
+    created_docks: dict[UUID, str] = {}

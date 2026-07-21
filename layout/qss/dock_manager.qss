@@ -5,39 +5,39 @@
     background-color: rgba(0, 0, 0, 0)
 }
 
-ads--CDockWidgetTab QLabel {
-    font-family: "Maple Mono NF CN";
-    font-size: 12pt;
-    font-weight: bold;
-}
-
-ads--CDockWidgetTab[activeTab="true"] QLabel {
-    color: {{window_background_color}}
-}
+/* -------------------- 标签页栏 ---------------------------- */
 
 ads--CDockWidgetTab[activeTab="true"] {
     background-color: {{general_splitter_color}};
     /* border-radius: 4px; */
 }
 
-
 ads--CDockWidgetTab[activeTab="false"]:hover {
     background-color: {{title_edit_background_color}};
     /* border-radius: 4px; */
 }
 
+ads--CDockWidgetTab QLabel {
+    font-family: "Maple Mono NF CN";
+    font-size: {{tab_label_font_size}};
+    font-weight: {{tab_label_font_weight}};
+}
+
+ads--CDockWidgetTab[activeTab="true"] QLabel {
+    color: {{window_background_color}}
+}
+
+/* -------------------- 主窗口的整体容器 ---------------------------- */
+
 ads--CDockContainerWidget {
     border-left: 1px solid {{general_splitter_color}};
 }
 
-ads--CDockAreaTitleBar {
-    /* border-bottom: 1px solid {{general_splitter_color}}; */
-    /* border-top: 1px solid {{general_splitter_color}}; */
+ads--CDockContainerWidget[mainWindow="false"] {
+    border-left: 0px
 }
 
-ads--CDockWidget {
-
-}
+/* -------------------- 标签页之间的把手 ---------------------------- */
 
 ads--CDockSplitter::handle {
     background-color: {{general_splitter_color}};
