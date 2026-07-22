@@ -4,6 +4,7 @@ from pathlib import Path
 from FovesLog import setup_log
 from FovesConfig import ConfigLoader
 
+from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import QApplication
 
@@ -12,6 +13,8 @@ from window.manager.manager import Manager
 
 if __name__ == "__main__":
     setup_log(log_floder=app_dir()/'logs')
+
+    QQuickStyle.setStyle("Fusion")
 
     app_argv = sys.argv[:]
 
@@ -23,7 +26,7 @@ if __name__ == "__main__":
     # 加载字体
     font_dir = app_dir() / 'fonts'
     for ext in ('*.ttf', '*.otf'):
-        for font_file in font_dir.glob(ext):
+        for font_file in font_dir.rglob(ext):
             QFontDatabase.addApplicationFont(str(font_file))
 
     # 创建窗口和信号连接

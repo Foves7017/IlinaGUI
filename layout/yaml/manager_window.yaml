@@ -1,6 +1,6 @@
 dark:
   tab_label_active_background_color: rgba(255, 255, 255, 64)
 general:
-  active_bar_width: 64
+  active_bar_width: 40
   tab_label_font_size: 11pt
   tab_label_font_weight: bold

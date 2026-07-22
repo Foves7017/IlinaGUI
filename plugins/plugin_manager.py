@@ -1,5 +1,7 @@
 import logging 
 import importlib
+from pathlib import Path
+
 from FovesLog import LoggedTask
 
 from PySide6.QtWidgets import QWidget
@@ -16,6 +18,7 @@ class PluginManager:
         self.name_to_widget: dict[str, type[QWidget|QQuickWidget]] = {}
         self.name_to_display_name: dict[str, str] = {}
         self.name_to_extra_name: dict[str, list[str]] = {}
+        self.name_to_icon_chara: dict[str, str] = {}
 
         self.formatter = formatter
 
@@ -24,14 +27,18 @@ class PluginManager:
             for path in (app_dir()/'plugins').iterdir():
                 if path.is_dir() and not path.stem.startswith('_'):
                     model = importlib.import_module(path.as_posix().replace('/', '.'))
-                    try:                        
+                    try:               
+                        # 加载内容组件         
                         content_widget = getattr(model, 'ContentWidget', None)
                         if content_widget is None:
                             self.log.error(f'插件"{path.stem}"中未找到 ContentWidget, 跳过加载')
                             continue
-
+                        self.name_to_widget[path.stem] = content_widget
+                        
+                        # 加载显示名称
                         self.name_to_display_name[path.stem] = getattr(model, 'PLUGIN_DISPLAY_NAME', path.stem)
 
+                        # 加载关联的文件格式
                         connect_extname = getattr(model, 'CONNECTED_FILES', None)
                         if connect_extname is not None:
                             if isinstance(connect_extname, str):
@@ -40,8 +47,12 @@ class PluginManager:
                                 self.name_to_extra_name[path.stem] = connect_extname
                             else:
                                 self.log.warning(f'插件"{path.stem}"中 CONNECTED_FILES 格式错误，忽略')
-
-                        self.name_to_widget[path.stem] = content_widget
+                        
+                        # 加载显示在侧边栏的图标
+                        icon = getattr(model, 'ACTIVE_BAR_ICON_CHARA', None)
+                        if icon:
+                            self.name_to_icon_chara[path.stem] = icon
+                            self.log.info(f'发现添加到侧边栏的图标')
                         
                     except ImportError as e:
                         self.log.error(f'插件"{path.stem}"无法导入，已跳过')

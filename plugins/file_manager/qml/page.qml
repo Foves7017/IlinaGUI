@@ -10,24 +10,23 @@ Item {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        implicitHeight: Math.max(pathdisplay.implicitHeight, styleSwitch.implicitHeight) + 8
+        implicitHeight: Math.max(pathdisplay.implicitHeight, styleSwitch.implicitHeight)
 
         Label {
-            id: pathdisplay
-            anchors.left: parent.left
-            anchors.margins: 4
-            anchors.verticalCenter: styleSwitch.verticalCenter
+            id: pathdisplay            
             text: backend.workspace
-
             color: formatter.get('title_path_text_color')
+            padding: 6
+
+            anchors.left: parent.left
+            anchors.verticalCenter: styleSwitch.verticalCenter
         }
 
         Switch {
             id: styleSwitch
-
-            anchors.top: parent.top
+            
             anchors.right: parent.right
-            anchors.margins: 4
+            anchors.top: parent.top
 
             checked: backend.view_content
             onToggled: {
@@ -36,9 +35,11 @@ Item {
             }
 
             palette.highlight: "transparent"
+            palette.button: formatter.get('title_path_text_color')
 
-            Label {
+            contentItem: Label {
                 id: switchLabel
+
                 anchors.right: parent.indicator.left
                 anchors.rightMargin: 6
                 anchors.verticalCenter: parent.verticalCenter

@@ -65,7 +65,6 @@ class ContentWidget(QQuickWidget):
         }) 
         # 递归工作目录添加元素
         def get_item(path: Path) -> QStandardItem:
-            print(path)
             item = QStandardItem(path.name)
             if path.is_file():
                 item.setData(path.absolute().as_posix(), Qt.ItemDataRole.UserRole + 1)

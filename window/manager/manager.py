@@ -39,27 +39,28 @@ class Manager(WindowBase):
         self.titlebar.titlelabel.setDisabled(True)
         self.setWindowTitle(self.workspace.stem + ' - Ilina GUI')
 
-        # 设置内容 widget
-        self.content = QWidget()
-        self.content_layout = QHBoxLayout(self.content)
-        self.content_layout.setContentsMargins(0, 0, 0, 0)
-        self.root_layout.addWidget(self.content)
-
-        # 设置左侧的活动栏
-        self.active_bar = ActiveBar(self.formatter)
-        self.content_layout.addWidget(self.active_bar)
-        self.formatter.add_qml_widget(self.active_bar, ACTIVEBAR_QML_PATH)
-
         # 初始化插件系统
         self.plugin_manager = PluginManager(self.formatter)
 
         # 设置右侧的 docker
         CDockManager.setConfigFlag(CDockManager.FloatingContainerHasWidgetTitle, False)
         self.dock_manager = DockManager(self.workspace, self.plugin_manager, self.formatter)
-        self.content_layout.addWidget(self.dock_manager)
         self.formatter.add_qss_widget(self.dock_manager, DOCK_MANAGER_QSS_PATH)
         self.dock_manager.setProperty('mainWindow', 'true')
         # self.titlebar.reload_button.pressed.connect(lambda: self.dock_manager.create_dock('file_manager'))
+
+        # 设置左侧的活动栏
+        self.active_bar = ActiveBar(self.formatter, self.plugin_manager.name_to_icon_chara)
+        self.formatter.add_qml_widget(self.active_bar, ACTIVEBAR_QML_PATH)
+        self.active_bar.button_clicked.connect(self.dock_manager.create_dock)
+
+        # 设置内容 widget
+        self.content = QWidget()
+        self.content_layout = QHBoxLayout(self.content)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.addWidget(self.active_bar)
+        self.content_layout.addWidget(self.dock_manager)
+        self.root_layout.addWidget(self.content)
 
     def showEvent(self, event: QShowEvent) -> None:
         # QTimer.singleShot(0, self.dock_manager.load_saved_dock)

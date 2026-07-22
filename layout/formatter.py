@@ -202,7 +202,9 @@ class Formatter:
         """ 设置一个关联到 QML 的组件，并立即注入 formatter """
         self.qml_widgets.append(QMLInfo(widget=qqwidget, qmlfilename=filename))
         # 立刻设置 context property，保证后续 QML 加载时 formatter 不会为 null
+        qqwidget.engine().clearComponentCache()
         qqwidget.rootContext().setContextProperty('formatter', self.qmlmap)
+        qqwidget.setSource(QUrl.fromLocalFile(filename))
         self.log.info(f'添加了 QML 组件 {qqwidget.objectName()} {filename}')
     
     def set_qss_style(self):
@@ -227,6 +229,7 @@ class Formatter:
         with LoggedTask('刷新所有QML组件的样式', logger=self.log):
             for widget in self.qml_widgets:
                 widget.widget.engine().clearComponentCache()
+                widget.widget.rootContext().setContextProperty('formatter', self.qmlmap)
                 widget.widget.setSource(QUrl.fromLocalFile(widget.qmlfilename))
                 count += 1
             self.log.info(f'刷新了 {count} 个QML组件')
