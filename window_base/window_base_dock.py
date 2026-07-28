@@ -10,10 +10,12 @@ from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushB
 from PySide6.QtQuickWidgets import QQuickWidget
 
 from utils import app_dir
-from layout.formatter import Formatter
+from globals import get_theme_manager
+from theme_manager import get_theme_manager
 from .titlebar import Titlebar
 from .consts import *
-from window.manager.consts import *
+from manager.consts import *
+from app_config import AppConfig, APP_CONFIG_PATH
 
 from ctypes import windll, byref, sizeof
 from ctypes.wintypes import HWND, INT
@@ -39,8 +41,7 @@ from win32con import (
         SIZE_MAXIMIZED,
     )
 
-
-class WindowBaseII(QWidget):
+class WindowBaseDock(QWidget):
     """ 窗口基类 """
     def __init__(self, container):
         super().__init__(container)
@@ -59,12 +60,13 @@ class WindowBaseII(QWidget):
         self.container.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
 
         # formatter
-        self.formatter = Formatter(self._get_scheme())
-        self.formatter.add_qss_widget(self, [WINDOWBASE_QSS_PATH, DOCK_MANAGER_QSS_PATH])
+        self.theme_manager = get_theme_manager()
+        self.theme_manager.theme = self._get_scheme()
+        self.theme_manager.add_qss_widget(self, [WINDOWBASE_QSS_PATH, DOCK_MANAGER_QSS_PATH])
 
         # 背景部件
         background_qqwidget = QQuickWidget()
-        self.formatter.add_qml_widget(background_qqwidget, BACKGROUND_QML_PATH)
+        self.theme_manager.add_qml_widget(background_qqwidget, BACKGROUND_QML_PATH)
 
         # 窗口布局，仅用于容纳背景部件
         window_layout = QVBoxLayout(self)
@@ -72,7 +74,7 @@ class WindowBaseII(QWidget):
         window_layout.addWidget(background_qqwidget)
 
         # 标题栏
-        self.titlebar = Titlebar(self.formatter)
+        self.titlebar = Titlebar()
         self.titlebar.close_button_pushed.connect(self._on_close)
         self.titlebar.min_button_pushed.connect(self._on_min)
         self.titlebar.max_button_pushed.connect(self._on_max)
@@ -143,15 +145,14 @@ class WindowBaseII(QWidget):
     #     margins = MARGINS(0, 0, 1, 0)
     #     windll.dwmapi.DwmExtendFrameIntoClientArea(hwnd, byref(margins))
 
-    def _get_scheme(self) -> Literal['light', 'dark']:
-        # 确定颜色主题
-        app: QApplication = QApplication.instance() # pyright: ignore[reportAssignmentType]
-        with ConfigLoader(CONFIG_PATH, WindowConfig) as conf:
-            if conf.scheme_setting == 'auto':
-                scheme = 'dark' if app.styleHints().colorScheme() == Qt.ColorScheme.Dark else 'light'
-            else:
-                scheme = conf.scheme_setting
-        return scheme
+    def _get_scheme(self) -> str:
+            # 确定颜色主题
+            app: QApplication = QApplication.instance() # pyright: ignore[reportAssignmentType]
+            with ConfigLoader(APP_CONFIG_PATH, AppConfig) as conf:
+                if app.styleHints().colorScheme() == Qt.ColorScheme.Dark:
+                    return conf.dark_theme_name
+                else:
+                    return conf.light_theme_name
     
     def nativeEvent(self, eventType: QByteArray, message: int):
         """处理 Windows 原生消息，补齐无边框窗口缺失的系统行为"""
@@ -177,7 +178,7 @@ class WindowBaseII(QWidget):
             local_y = y - self.frameGeometry().y()
 
             # 标题栏区域返回 HTCAPTION
-            if 0 <= local_x <= self.width() and 0 <= local_y <= self.formatter.titlebar_height:
+            if 0 <= local_x <= self.width() and 0 <= local_y <= self.theme_manager.titlebar_height:
                 # 但按钮区域不过度拦截，让 Qt 控件正常接收事件
                 child = self.childAt(QPoint(local_x, local_y))
                 if child is None or child.objectName() == 'TitleBar':
@@ -197,7 +198,7 @@ class WindowBaseII(QWidget):
         # self.reload_style()
         
         if event.button() == Qt.MouseButton.LeftButton:  # 按下左键
-            if self.edge_board < event.pos().y() < self.formatter.titlebar_height: 
+            if self.edge_board < event.pos().y() < self.theme_manager.titlebar_height: 
                 # 检查标题栏拖动
                 child = self.container.childAt(event.pos())
                 if child and child.objectName() == 'TitleBar' and not self._dragging:
@@ -285,7 +286,7 @@ class WindowBaseII(QWidget):
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         # 双击缩放
         if event.button() == Qt.MouseButton.LeftButton:
-            if event.pos().y() < self.formatter.titlebar_height:
+            if event.pos().y() < self.theme_manager.titlebar_height:
                 child = self.childAt(event.pos())
                 if child and child.objectName() == 'TitleBar':
                     self._on_max()
@@ -313,8 +314,8 @@ class WindowBaseII(QWidget):
         # 有时候会在还没初始化到那里的时候就调用，这时候就先不加载（似乎是窗口渲染了但是组件还没初始化）
         try:
             self.log.info(f'重新加载样式 (颜色主题：{scheme})')
-            self.formatter.theme = scheme
-            self.formatter.reload()
+            self.theme_manager.theme = scheme
+            self.theme_manager.reload()
         except AttributeError:
             self.log.warning(f'跳过了加载主题')
         # 如果指定了回调函数就调用

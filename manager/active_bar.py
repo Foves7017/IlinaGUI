@@ -5,7 +5,8 @@ from PySide6.QtWidgets import QSizePolicy
 from PySide6.QtQuickWidgets import QQuickWidget
 
 from .consts import *
-from layout.formatter import Formatter
+
+from globals import get_theme_manager
 
 class ActiveBar(QQuickWidget):
     """ 活动栏，类似 VSCode 最左侧的 
@@ -21,8 +22,7 @@ class ActiveBar(QQuickWidget):
 
     button_clicked = Signal(str)
 
-    def __init__(self, formatter: Formatter,
-                 icons: dict[str, str]={}):
+    def __init__(self, icons: dict[str, str]={}):
         super().__init__()
         self.setClearColor(Qt.GlobalColor.transparent)
         self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
@@ -32,7 +32,7 @@ class ActiveBar(QQuickWidget):
             QSizePolicy.Policy.Expanding
         )
 
-        self.setFixedWidth(formatter.active_bar_width)
+        self.setFixedWidth(get_theme_manager().active_bar_width)
 
         self._icons: dict[str, str] = icons
 

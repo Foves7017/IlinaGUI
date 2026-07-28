@@ -3,7 +3,8 @@ from FovesConfig import ConfigLoader
 from PySide6.QtCore import Signal, QTimer, Qt
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QSizePolicy
 
-from layout.formatter import Formatter
+
+from globals import get_theme_manager
 from .consts import *
 from .title_label import TitleLabel
 
@@ -56,10 +57,11 @@ class Titlebar(QWidget):
     max_button_pushed = Signal()
     min_button_pushed = Signal()
 
-    def __init__(self, formatter: Formatter):
+    def __init__(self):
         super().__init__()
 
-        self.setFixedHeight(formatter.titlebar_height)
+        theme_manager = get_theme_manager()
+        self.setFixedHeight(theme_manager.titlebar_height)
         self.setObjectName('TitleBar')
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setContentsMargins(0, 0, 0, 2)  # QSS 离指定了底部边框高度是 1px，所以这里底部需要留出空间，否则按钮会盖住边框
@@ -71,17 +73,17 @@ class Titlebar(QWidget):
         self.titlelabel = TitleLabel()
 
         # 关闭按钮
-        self.close_button = TitlebarButton(SEGOE_FLUENT_ICON_CLOSE, formatter.titlebar_height, '关闭')
+        self.close_button = TitlebarButton(SEGOE_FLUENT_ICON_CLOSE, theme_manager.titlebar_height, '关闭')
         self.close_button.setObjectName('TitleBarClose')
 
         # 最大化/还原按钮
-        self.max_button = TitlebarMaxButton(SEGOE_FLUENT_ICON_MAX, formatter.titlebar_height)
+        self.max_button = TitlebarMaxButton(SEGOE_FLUENT_ICON_MAX, theme_manager.titlebar_height)
 
         # 最小化按钮
-        self.min_button = TitlebarButton(SEGOE_FLUENT_ICON_MIN, formatter.titlebar_height, '最小化')
+        self.min_button = TitlebarButton(SEGOE_FLUENT_ICON_MIN, theme_manager.titlebar_height, '最小化')
 
         # 重载样式按钮
-        self.reload_button = TitlebarButton(SEGOE_FLUENT_ICON_RELOAD, formatter.titlebar_height, '重新加载样式')
+        self.reload_button = TitlebarButton(SEGOE_FLUENT_ICON_RELOAD, theme_manager.titlebar_height, '重新加载样式')
 
         # 布局
         self._layout = QHBoxLayout(self)
@@ -98,7 +100,7 @@ class Titlebar(QWidget):
         self.close_button.pressed.connect(self.close_button_pushed.emit)
         self.max_button.pressed.connect(self.max_button_pushed.emit)
         self.min_button.pressed.connect(self.min_button_pushed.emit)
-        self.reload_button.pressed.connect(formatter.reload)
+        self.reload_button.pressed.connect(theme_manager.reload)
 
     @property
     def is_max(self) -> bool:

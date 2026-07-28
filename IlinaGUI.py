@@ -9,7 +9,7 @@ from PySide6.QtGui import QFontDatabase
 from PySide6.QtWidgets import QApplication
 
 from utils import app_dir
-from window.manager.manager import Manager
+from manager.manager import Manager
 
 if __name__ == "__main__":
     setup_log(log_floder=app_dir()/'logs')

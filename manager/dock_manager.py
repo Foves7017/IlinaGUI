@@ -8,34 +8,18 @@ from PySide6.QtWidgets import QWidget
 from PySide6QtAds import CDockManager, CDockWidget, DockWidgetArea
 
 from .consts import *
-from plugins.consts import InitParam
-from layout.formatter import Formatter
-from plugins.plugin_manager import PluginManager
-from window.window_base.window_base_dock import WindowBaseII
+from plugins.plugin_manager import get_plugin_manager
+from window_base.window_base_dock import WindowBaseDock
+from utils import generate_uuid
 
 class DockManager(CDockManager):
     close = Signal()
 
-    def __init__(self, 
-                 workspace: Path, 
-                 plugin_manager: PluginManager,
-                 formatter: Formatter,
-                 ):
+    def __init__(self):
         super().__init__()
         self.log = logging.getLogger('Dock 管理器')
 
         self.floatingWidgetCreated.connect(self._on_floating_created)
-
-        self.workspace = workspace
-        self.plugin_manager = plugin_manager
-        self.initparam = InitParam(
-            workspace=workspace.as_posix(),
-            open_file=None,
-            formatter=formatter,
-            plugin_manager=plugin_manager,
-            uuid=None,
-            dock_manager=self,
-        )
 
         self.created_docks: dict[UUID, str] = {}
 
@@ -46,7 +30,7 @@ class DockManager(CDockManager):
 
         layout = container.layout()
         layout.setContentsMargins(0, 0, 0, 0)
-        base = WindowBaseII(container)
+        base = WindowBaseDock(container)
         self.close.connect(base.close)
         self.close.connect(container.close)
         layout.addWidget(base)
@@ -54,7 +38,6 @@ class DockManager(CDockManager):
         inner = layout.takeAt(0)
         inner.widget().setProperty('mainWindow', 'false')
         base.root_layout.addWidget(inner.widget())
-        base.titlebar.titlelabel.label = self.workspace.stem
 
     def _on_dock_close(self, uuid: UUID):
         self.log.info(f'移除面板：{uuid}')
@@ -68,22 +51,18 @@ class DockManager(CDockManager):
         """ 根据指定的插件名创建一个面板 """
         self.log.info(f'尝试创建面板：{plugin_name}')
         if uuid is None:
-            uuid = uuid4()
+            uuid = generate_uuid()
         
-        widget_t = self.plugin_manager.get_widget_type_by_name(plugin_name)
-
-        self.initparam.uuid = uuid
-        self.initparam.open_file = open_file
+        widget_t = get_plugin_manager().get_widget_type_by_name(plugin_name)
 
         if widget_t is not None:
-            print(self.initparam)
-            widget = widget_t(self.initparam) # pyright: ignore[reportArgumentType, reportCallIssue]
-            dock = CDockWidget(self.plugin_manager.get_display_name_by_name(plugin_name))
+            widget = widget_t(uuid) # pyright: ignore[reportArgumentType, reportCallIssue]
+            dock = CDockWidget(get_plugin_manager().get_display_name_by_name(plugin_name))
             dock.setWidget(widget)
             dock.setObjectName(str(uuid))
             dock.closed.connect(lambda: self._on_dock_close(uuid))
             self.addDockWidget(DockWidgetArea.LeftDockWidgetArea, dock)
-            self.log.info(f'创建成功 {id(dock)=} {uuid=}')
+            self.log.info(f'创建成功 {uuid=}')
             self.created_docks[uuid] = plugin_name
         else:
             self.log.warning(f'创建面板 {plugin_name} 失败，未获取到类型')
@@ -103,3 +82,11 @@ class DockManager(CDockManager):
     def save_created_docks(self):
         with ConfigLoader(MANAGER_CONFIG_PATH, ManagerConfig) as config:
             config.created_docks = self.created_docks
+
+dock: DockManager|None = None
+
+def get_dock_manager() -> DockManager:
+    global dock
+    if dock is None:
+        dock = DockManager()
+    return dock

@@ -53,7 +53,7 @@ YAML_FOLDER = app_dir()/'layout'/'yaml'
 QSS_FOLDER = app_dir()/'layout'/'qss'
 QML_FOLDER = app_dir()/'layout'/'qml'
 
-class Formatter:
+class ThemeManager:
     """ 管理 YAML 配置，并实现热重载
     1. YAML 加载功能
 
@@ -101,7 +101,8 @@ class Formatter:
 
         self.qss_widgets: list[QSSInfo] = []
         self.qml_widgets: list[QMLInfo] = []
-        self._plugin_yaml_files: list[Path] = []
+        self.yamls: list[Path] = []
+        self.theme_dict = {}  # 保存加载了主题的字典
 
         # 提前创建 ThemeBridge，保证 add_qml_widget 时就能注入
         self.qmlmap = ThemeBridge()
@@ -109,9 +110,13 @@ class Formatter:
         self.load_yaml()
 
     def add_yaml(self, filename: str|Path):
+        self.yamls.append(Path(filename))
+        self.parse_yaml(filename)
+
+    def parse_yaml(self, filename: str|Path):
         """ 加载 YAML 文件 """
         filename = Path(filename)
-        self.log.info(f'加载 YAML 文件 {filename}')
+        self.log.debug(f'加载 YAML 文件 {filename}')
         with open(filename, 'r', encoding='UTF8') as f:
             content = yaml.safe_load(f)
             for  _theme in [self._theme, 'general']:
@@ -132,25 +137,13 @@ class Formatter:
                             self.theme_dict[key] = content[_theme][key]
                             self.log.debug(f'添加 {key} 为 {self.theme_dict[key]}')
 
-        # 记录非主 YAML 文件夹的文件，供 reload 时重新加载
-        if not str(filename.resolve()).startswith(str(YAML_FOLDER.resolve())):
-            if filename not in self._plugin_yaml_files:
-                self._plugin_yaml_files.append(filename)
-
     def load_yaml(self):
         """ 从 YAML 中加载主题 """
         self.theme_dict = {}  # 保存加载了主题的字典
         with LoggedTask('从 YAML 中加载主题', logger=self.log) as task:
-            for path, _, files in YAML_FOLDER.walk():
-                for file in files:
-                    filename = path / file
-                    if filename.suffix == '.yaml':
-                        self.add_yaml(filename)
-                        task.checkpoint(f'已加载 {str(filename)}')
-            # 重新加载插件 YAML（它们在首次 add_yaml 时已被记录）
-            for filename in self._plugin_yaml_files:
+            for filename in self.yamls:
                 if filename.exists():
-                    self.add_yaml(filename)
+                    self.parse_yaml(filename)
                     task.checkpoint(f'已重新加载 {str(filename)}')
 
     def __getattr__(self, name):
@@ -160,7 +153,7 @@ class Formatter:
             else:
                 return self.theme_dict[name]
         else:
-            raise KeyError(f'{name} 当前主题的 YAML 文件中不包含 {name}')
+            raise KeyError(f'当前主题的 YAML 文件中不包含 {name}')
     
     def __getitem__(self, key):
         return self.__getattr__(key)
@@ -239,3 +232,11 @@ class Formatter:
         self.load_yaml()
         self.set_qss_style()
         self.set_qml_style()
+
+manager: ThemeManager|None = None
+
+def get_theme_manager() -> ThemeManager:
+    global manager
+    if manager is None:
+        manager = ThemeManager()
+    return manager

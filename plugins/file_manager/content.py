@@ -1,4 +1,5 @@
 import os
+from uuid import UUID
 from pathlib import Path
 from logging import getLogger
 from PySide6.QtGui import QStandardItemModel, QStandardItem
@@ -6,7 +7,7 @@ from PySide6.QtCore import Qt, QObject, Property, Signal, QDirIterator, QByteArr
 from PySide6.QtWidgets import QFileSystemModel
 from PySide6.QtQuickWidgets import QQuickWidget
 
-from plugins.consts import InitParam
+from globals import get_theme_manager, get_workspace, get_plugin_manager, get_dock_manager
 
 QML_FILEPATH = r'plugins\file_manager\qml\page.qml'
 YAML_PATH = r'plugins\file_manager\yaml.yaml'
@@ -48,12 +49,12 @@ class Backend(QObject):
         self.view_content_signal.emit()
 
 class ContentWidget(QQuickWidget):
-    def __init__(self, init_param: InitParam):
+    def __init__(self, uuid: UUID):
         super().__init__()
         self.setClearColor(Qt.GlobalColor.transparent)
         self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
 
-        self.uuid = init_param.uuid
+        self.uuid = uuid
         self.log = getLogger(f'文件管理插件[{str(self.uuid).split('-')[-1]}]')
         self.filenames: list[str] = []
 
@@ -74,7 +75,7 @@ class ContentWidget(QQuickWidget):
                     item.appendRow(get_item(Path(_next)))
             
             return item
-        for top in Path(init_param.workspace).iterdir():
+        for top in get_workspace().iterdir():
             self.file_model.appendRow(get_item(top))
 
 
@@ -86,15 +87,15 @@ class ContentWidget(QQuickWidget):
             Qt.ItemDataRole.UserRole + 2: QByteArray(b'plugname')
         }) 
         # 遍历插件内容添加元素
-        for name, file_filter in init_param.plugin_manager.name_to_extra_name.items():
+        for name, file_filter in get_plugin_manager().name_to_extra_name.items():
             plug = QStandardItem(name)
 
-            qdir = QDirIterator(init_param.workspace, file_filter,
+            qdir = QDirIterator(get_workspace().absolute().as_posix(), file_filter,
                                 flags=QDirIterator.IteratorFlag.Subdirectories)
             
             while qdir.hasNext():
                 item = qdir.next()
-                child = QStandardItem(Path(item).relative_to(init_param.workspace).as_posix())
+                child = QStandardItem(Path(item).relative_to(get_workspace()).as_posix())
                 child.setData(item, Qt.ItemDataRole.UserRole + 1)
                 child.setData(name, Qt.ItemDataRole.UserRole + 2)
                 plug.appendRow(child)
@@ -102,9 +103,9 @@ class ContentWidget(QQuickWidget):
             self.plugin_model.appendRow(plug)
 
         # 设置 QML
-        self.backend = Backend(init_param.workspace, self.plugin_model, self.file_model)
+        self.backend = Backend(get_workspace().absolute().as_posix(), self.plugin_model, self.file_model)
         self.backend.double_click_item.connect(lambda x, y: print(f'双击: ({y}) {x}'))
-        self.backend.double_click_item.connect(lambda x, y: init_param.dock_manager.create_dock(plugin_name=x, open_file=y))
+        self.backend.double_click_item.connect(lambda x, y: get_dock_manager().create_dock(plugin_name=x, open_file=y))
         self.rootContext().setContextProperty('backend', self.backend)
         # self.rootContext().setContextProperty("file_root_index", root_index)
-        init_param.formatter.add_qml_widget(self, QML_FILEPATH)
+        get_theme_manager().add_qml_widget(self, QML_FILEPATH)
