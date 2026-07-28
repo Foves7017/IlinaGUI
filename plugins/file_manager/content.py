@@ -13,7 +13,7 @@ YAML_PATH = r'plugins\file_manager\yaml.yaml'
 
 class Backend(QObject):
     view_content_signal = Signal()
-    double_click_item = Signal(str)
+    double_click_item = Signal(str, str)
 
     def __init__(self, 
                  workspace: str,
@@ -82,7 +82,8 @@ class ContentWidget(QQuickWidget):
         self.plugin_model = QStandardItemModel()
         self.plugin_model.setItemRoleNames({
             Qt.ItemDataRole.DisplayRole: QByteArray(b'display'),
-            Qt.ItemDataRole.UserRole + 1: QByteArray(b'filePath')
+            Qt.ItemDataRole.UserRole + 1: QByteArray(b'filePath'),
+            Qt.ItemDataRole.UserRole + 2: QByteArray(b'plugname')
         }) 
         # 遍历插件内容添加元素
         for name, file_filter in init_param.plugin_manager.name_to_extra_name.items():
@@ -95,13 +96,15 @@ class ContentWidget(QQuickWidget):
                 item = qdir.next()
                 child = QStandardItem(Path(item).relative_to(init_param.workspace).as_posix())
                 child.setData(item, Qt.ItemDataRole.UserRole + 1)
+                child.setData(name, Qt.ItemDataRole.UserRole + 2)
                 plug.appendRow(child)
             
             self.plugin_model.appendRow(plug)
 
         # 设置 QML
         self.backend = Backend(init_param.workspace, self.plugin_model, self.file_model)
-        self.backend.double_click_item.connect(lambda x: print(f'双击: {x}'))
+        self.backend.double_click_item.connect(lambda x, y: print(f'双击: ({y}) {x}'))
+        self.backend.double_click_item.connect(lambda x, y: init_param.dock_manager.create_dock(plugin_name=x, open_file=y))
         self.rootContext().setContextProperty('backend', self.backend)
         # self.rootContext().setContextProperty("file_root_index", root_index)
         init_param.formatter.add_qml_widget(self, QML_FILEPATH)

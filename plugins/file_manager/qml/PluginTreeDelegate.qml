@@ -14,7 +14,7 @@ TreeViewDelegate {
             mouse.accepted = true
         }
         onDoubleClicked: function(mouse) {
-            backend.double_click_item(model.filePath)
+            backend.double_click_item(model.plugname, model.filePath)
             mouse.accepted = true
         }
     }

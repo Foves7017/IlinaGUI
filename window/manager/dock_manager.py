@@ -34,6 +34,7 @@ class DockManager(CDockManager):
             formatter=formatter,
             plugin_manager=plugin_manager,
             uuid=None,
+            dock_manager=self,
         )
 
         self.created_docks: dict[UUID, str] = {}
@@ -75,6 +76,7 @@ class DockManager(CDockManager):
         self.initparam.open_file = open_file
 
         if widget_t is not None:
+            print(self.initparam)
             widget = widget_t(self.initparam) # pyright: ignore[reportArgumentType, reportCallIssue]
             dock = CDockWidget(self.plugin_manager.get_display_name_by_name(plugin_name))
             dock.setWidget(widget)

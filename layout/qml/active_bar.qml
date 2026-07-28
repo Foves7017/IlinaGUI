@@ -11,7 +11,7 @@ Item {
         anchors.topMargin: 8
         anchors.bottomMargin: 8
         anchors.leftMargin: 10
-        spacing: 4
+        spacing: 8
 
         Repeater {
             model: backend.icon_keys
