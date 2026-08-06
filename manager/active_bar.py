@@ -1,4 +1,4 @@
-from pathlib import Path
+from typing import Callable
 
 from PySide6.QtCore import Qt, QUrl, Signal, Property, Slot
 from PySide6.QtWidgets import QSizePolicy
@@ -6,7 +6,7 @@ from PySide6.QtQuickWidgets import QQuickWidget
 
 from .consts import *
 
-from globals import get_theme_manager
+from globals import get_theme_manager, get_plugin_manager
 
 class ActiveBar(QQuickWidget):
     """ 活动栏，类似 VSCode 最左侧的 
@@ -20,9 +20,9 @@ class ActiveBar(QQuickWidget):
 
     """
 
-    button_clicked = Signal(str)
+    button_clicked = Signal(str, UUID, str)
 
-    def __init__(self, icons: dict[str, str]={}):
+    def __init__(self):
         super().__init__()
         self.setClearColor(Qt.GlobalColor.transparent)
         self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
@@ -34,7 +34,8 @@ class ActiveBar(QQuickWidget):
 
         self.setFixedWidth(get_theme_manager().active_bar_width)
 
-        self._icons: dict[str, str] = icons
+        self._icons: dict[str, str] = get_plugin_manager().name_to_icon_chara
+        self._hooks: dict[str, Callable] = get_plugin_manager().name_to_icon_hook
 
         self.rootContext().setContextProperty('backend', self)
 
@@ -50,4 +51,8 @@ class ActiveBar(QQuickWidget):
     @Slot(str)
     def trigger_clicked(self, key: str):
         """ QML 按钮点击时调用，转发为 clicked_button 信号 """
-        self.button_clicked.emit(key)
+        if key in self._hooks:
+            file = self._hooks[key]()
+        else:
+            file = None
+        self.button_clicked.emit(key, None, file)

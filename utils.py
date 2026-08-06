@@ -7,6 +7,11 @@ def app_dir() -> Path:
         return Path(sys.executable).parent
     return Path('.')
 
+def python_runtime_path() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable)
+    return Path('.venv/Scripts/python.exe')
+
 def plugin_dir() -> Path:
     return app_dir()/'plugins'
 

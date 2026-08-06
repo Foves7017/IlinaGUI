@@ -49,8 +49,9 @@ class Backend(QObject):
         self.view_content_signal.emit()
 
 class ContentWidget(QQuickWidget):
-    def __init__(self, uuid: UUID):
+    def __init__(self, uuid: UUID, *args):
         super().__init__()
+        # 设置透明背景
         self.setClearColor(Qt.GlobalColor.transparent)
         self.setAttribute(Qt.WidgetAttribute.WA_AlwaysStackOnTop)
 

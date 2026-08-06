@@ -12,18 +12,21 @@ from utils import app_dir
 from manager.manager import Manager
 
 if __name__ == "__main__":
+    # 1. 初始化日志系统
     setup_log(log_floder=app_dir()/'logs')
 
-    QQuickStyle.setStyle("Fusion")
 
+    # 2. 创建 app
     app_argv = sys.argv[:]
-
     if sys.platform == 'win32':
         app_argv += ['-platform', 'windows:darkmode=2']    
-
     app = QApplication(app_argv) 
 
-    # 加载字体
+    # 3. 设置主题
+    QQuickStyle.setStyle("Fusion")
+    app.setStyle("Fusion")
+
+    # 4. 加载字体
     font_dir = app_dir() / 'fonts'
     for ext in ('*.ttf', '*.otf'):
         for font_file in font_dir.rglob(ext):

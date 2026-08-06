@@ -21,7 +21,7 @@ class DockManager(CDockManager):
 
         self.floatingWidgetCreated.connect(self._on_floating_created)
 
-        self.created_docks: dict[UUID, str] = {}
+        self.created_docks: dict[UUID, DockInfo] = {}
 
         self.log.info(f'初始化完成')
     
@@ -56,21 +56,25 @@ class DockManager(CDockManager):
         widget_t = get_plugin_manager().get_widget_type_by_name(plugin_name)
 
         if widget_t is not None:
-            widget = widget_t(uuid) # pyright: ignore[reportArgumentType, reportCallIssue]
+            widget = widget_t(uuid, open_file) # pyright: ignore[reportArgumentType, reportCallIssue]
             dock = CDockWidget(get_plugin_manager().get_display_name_by_name(plugin_name))
             dock.setWidget(widget)
             dock.setObjectName(str(uuid))
             dock.closed.connect(lambda: self._on_dock_close(uuid))
-            self.addDockWidget(DockWidgetArea.LeftDockWidgetArea, dock)
+            self.addDockWidget(DockWidgetArea.RightDockWidgetArea, dock)
             self.log.info(f'创建成功 {uuid=}')
-            self.created_docks[uuid] = plugin_name
+            self.created_docks[uuid] = DockInfo(
+                plugin_name=plugin_name,
+                uuid=uuid,
+                openfile=open_file,
+            )
         else:
             self.log.warning(f'创建面板 {plugin_name} 失败，未获取到类型')
     
     def load_saved_dock(self):
         config = ConfigLoader(MANAGER_CONFIG_PATH, ManagerConfig).readonly()
-        for uuid, name in config.created_docks.items():
-            self.create_dock(name, uuid)
+        for dockinfo in config.created_docks:
+            self.create_dock(dockinfo.plugin_name, dockinfo.uuid, dockinfo.openfile)
 
         if config.dock_state.encode():
             QTimer.singleShot(0, lambda ctx=config: (
@@ -81,7 +85,7 @@ class DockManager(CDockManager):
     
     def save_created_docks(self):
         with ConfigLoader(MANAGER_CONFIG_PATH, ManagerConfig) as config:
-            config.created_docks = self.created_docks
+            config.created_docks = list(self.created_docks.values())
 
 dock: DockManager|None = None
 

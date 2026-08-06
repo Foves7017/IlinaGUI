@@ -13,6 +13,8 @@ hide_*
 reinstallEngine.bat
 docs/色卡.pptx
 
+IlinaEngine/*
+
 *.zip
 右键菜单.reg
 

@@ -1,16 +1,18 @@
 import QtQuick
 
+
 Item {
     anchors.fill: parent
+    property bool hasBackground: !!formatter.get('background_images')
 
     // --- 分支一：有背景图时 ---
     Image {
         id: _bg_source
         anchors.fill: parent
-        source: formatter.get('background_images') !== null
+        source: hasBackground
             ? "file:///" + formatter.get('background_images')
             : ""
-        visible: formatter.get('background_images') !== null
+        visible: hasBackground
         fillMode: Image.PreserveAspectCrop
     }
 
@@ -18,7 +20,7 @@ Item {
     Canvas {
         id: radialVignette
         anchors.fill: parent
-        visible: formatter.get('background_images') !== null
+        visible: hasBackground
         onPaint: {
             var ctx = getContext("2d")
             var cx = width / 2
@@ -38,6 +40,6 @@ Item {
     Rectangle {
         anchors.fill: parent
         color: formatter.get('window_background_color')
-        visible: formatter.get('background_images') === null
+        visible: !hasBackground
     }
 }

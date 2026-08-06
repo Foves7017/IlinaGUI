@@ -5,13 +5,10 @@ from FovesConfig import ConfigLoader
 
 from app_config import APP_CONFIG_PATH, AppConfig
 
-print(f'import theme')
 from theme_manager import get_theme_manager
 
-print(f'import dock manager')
 from manager.dock_manager import get_dock_manager
 
-print(f'import plugin manager')
 from plugins.plugin_manager import get_plugin_manager
 
 def get_workspace() -> Path:

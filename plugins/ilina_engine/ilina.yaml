@@ -1,0 +1,30 @@
+dark:
+  role_user_normal_color: '#C0C080'                               # 用户角色颜色
+  role_assistant_normal_color: '#8080C0'                          # 助手角色颜色
+  role_tool_normal_color: '#80C080'                               # 工具角色颜色
+  role_system_normal_color: '#C0C0C0'                             # 系统角色颜色
+  role_error_normal_color: '#C08080'                              # 错误角色颜色
+
+  role_user_extra_color: '#808040'                               # 用户角色颜色
+  role_assistant_extra_color: '#404080'                          # 助手角色颜色
+  role_tool_extra_color: '#408040'                               # 工具角色颜色
+  role_system_extra_color: '#404040'                             # 系统角色颜色
+  role_error_extra_color: '#804040'                              # 错误角色颜色
+
+light:
+  role_user_normal_color: '#ffbd58'                               # 用户角色颜色
+  role_assistant_normal_color: '#5887ff'                          # 助手角色颜色
+  role_tool_normal_color: '#31b62b'                               # 工具角色颜色
+  role_system_normal_color: '#828282'                             # 系统角色颜色
+  role_error_normal_color: '#ff5858'                              # 错误角色颜色
+
+  role_user_extra_color: '#ffdeac'                               # 用户角色颜色
+  role_assistant_extra_color: '#adc4ff'                          # 助手角色颜色
+  role_tool_extra_color: '#89c086'                               # 工具角色颜色
+  role_system_extra_color: '#C0C0C0'                             # 系统角色颜色
+  role_error_extra_color: '#FFC0C0'                              # 错误角色颜色
+general:
+  max_content_height: 50
+  role_column_width: 80
+
+  message_list_spacing: 0

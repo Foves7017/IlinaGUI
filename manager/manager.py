@@ -42,7 +42,7 @@ class Manager(WindowBase):
         # self.titlebar.reload_button.pressed.connect(lambda: self.dock_manager.create_dock('file_manager'))
 
         # 设置左侧的活动栏
-        self.active_bar = ActiveBar(self.plugin_manager.name_to_icon_chara)
+        self.active_bar = ActiveBar()
         get_theme_manager().add_qml_widget(self.active_bar, ACTIVEBAR_QML_PATH)
         self.active_bar.button_clicked.connect(self.dock_manager.create_dock)
 
