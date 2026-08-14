@@ -31,3 +31,6 @@
 `get_skills`：获取一个类似的，skill def 的列表
 `get_system_replace`：会添加到系统提示的记忆
 通过工具暴露记忆目录和具体查询
+
+# 遗憾
+很抱歉，但……Deepseek harness，那其实就是我梦想中的 Ilina 应该有的样子。Ilina GUI 的开发会暂缓一段时间……

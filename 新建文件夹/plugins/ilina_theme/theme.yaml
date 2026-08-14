@@ -1,0 +1,56 @@
+Ilina_light:
+  # Specal
+  window_titlebar_background_color: 0x00FFEFEF  # 窗口标题栏背景颜色（COLORREF）
+  dock_close_button_url: ":/ads/images/close-button.svg"  # dock 关闭按钮图标
+  dock_close_button_disabled_url: ":/ads/images/close-button-disabled.svg"  # dock 禁用的关闭按钮的图标
+
+  # Base
+  background_color: "#EFEFFF"  # 主背景颜色
+  surface_color: "#FFFFFF"  # 面板/表面背景颜色
+  card_color: "#E7E7F5"  # 卡片背景颜色
+  element_color: "#DCDCF0"  # 控件元素背景颜色
+
+  # Text
+  text_color: "#202030"  # 主文本颜色
+  secondary_text_color: "#606080"  # 次要文本颜色
+  disabled_text_color: "#A0A0B0"  # 禁用状态文本颜色
+
+  # Border
+  border_color: "#000000"  # 边框颜色
+
+  # Accent
+  theme_color: "#8080FF"  # 主题强调色
+  theme_color_hover: "#9696FF"  # 悬停状态主题色
+  theme_color_pressed: "#6666CC"  # 按下状态主题色
+  theme_color_disabled: "#B0B0D0"  # 禁用状态主题色
+
+Ilina_dark:
+  # Specal
+  window_titlebar_background_color: 0x00200F0F  # 窗口标题栏背景颜色（COLORREF）
+  dock_close_button_url: ":/ads/images/close-button_dark.svg"  # dock 关闭按钮图标
+  dock_close_button_disabled_url: ":/ads/images/close-button-disabled_dark.svg"  # dock 禁用的关闭按钮的图标
+
+  # Base
+  background_color: "#0F0F1F"  # 主背景颜色
+  surface_color: "#161629"  # 面板/表面背景颜色
+  card_color: "#1D1D35"  # 卡片背景颜色
+  element_color: "#272747"  # 控件元素背景颜色
+
+  # Text
+  text_color: "#F0F0FF"  # 主文本颜色
+  secondary_text_color: "#B8B8D0"  # 次要文本颜色
+  disabled_text_color: "#707088"  # 禁用状态文本颜色
+
+  # Border
+  border_color: "#FFFFFF"  # 边框颜色
+
+  # Accent
+  theme_color: "#8080FF"  # 主题强调色
+  theme_color_hover: "#9696FF"  # 悬停状态主题色
+  theme_color_pressed: "#6666CC"  # 按下状态主题色
+  theme_color_disabled: "#404060"  # 禁用状态主题色
+
+general:
+  active_bar_width: 40  # 活动栏宽度
+  dock_label_font_size: 10pt  # dock 标题字号
+  dock_label_font_weight: normal  # dock 标题字重

@@ -1,0 +1,55 @@
+Sylvia:
+  # Specal
+  window_titlebar_background_color: 0x00E8FDFF
+  background_images: "D:/Find-A-Way-VII/新建文件夹/plugins/anim_theme/images/background_sylvia.png"
+  background_filter_color: rgba(255, 252, 209, 0.6)
+  dock_close_button_url: ":/ads/images/close-button.svg"
+  dock_close_button_disabled_url: ":/ads/images/close-button-disabled.svg"
+
+  # Base
+  background_color: "#FFFCD1"
+  surface_color: "#FFFDE8"
+  card_color: "#F5F2D5"
+  element_color: "#EAE6C5"
+
+  # Text
+  text_color: "#303020"
+  secondary_text_color: "#707050"
+  disabled_text_color: "#AAA88C"
+
+  # Border
+  border_color: "#000000"
+
+  # Accent
+  theme_color: "#D6B84C"
+  theme_color_hover: "#E2C866"
+  theme_color_pressed: "#B89A35"
+  theme_color_disabled: "#C8BD80"
+
+Ao:
+  # Specal
+  window_titlebar_background_color: 0x00361A12  # 窗口标题栏背景颜色（COLORREF）
+  background_images: "C:/Users/chihu/Pictures/Aoi/CG_AO03_0201__base.png"  # 背景图片
+  background_filter_color: rgba(11, 16, 36, 0.75)  # 背景滤镜颜色
+  dock_close_button_url: ":/ads/images/close-button_dark.svg"  # dock 关闭按钮图标
+  dock_close_button_disabled_url: ":/ads/images/close-button-disabled_dark.svg"  # dock 禁用的关闭按钮的图标
+
+  # Base
+  background_color: "#0B1024"
+  surface_color: "#121A36"
+  card_color: "#192346"
+  element_color: "#26325C"
+
+  # Text
+  text_color: "#F2F3FF"
+  secondary_text_color: "#B8C0E8"
+  disabled_text_color: "#6D7599"
+
+  # Border
+  border_color: "#FFFFFF"
+
+  # Accent
+  theme_color: "#A8B7FF"
+  theme_color_hover: "#C0CBFF"
+  theme_color_pressed: "#8795CC"
+  theme_color_disabled: "#505A80"

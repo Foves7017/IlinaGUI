@@ -1,0 +1,68 @@
+* {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* -------------------- 标签页栏 ---------------------------- */
+
+ads--CDockWidgetTab[activeTab="false"] {
+    background-color: {{surface_color}};
+}
+
+ads--CDockWidgetTab[activeTab="false"]:hover {
+    background-color: {{card_color}};
+}
+
+ads--CDockWidgetTab QLabel {
+    font-family: "Maple Mono NF CN";
+    font-size: {{dock_label_font_size}};
+    font-weight: {{dock_label_font_weight}};
+}
+
+/* -------------------- 标签页之间的把手 ---------------------------- */
+
+ads--CDockSplitter::handle {
+    background-color: {{surface_color}};
+    height: 4px;
+    width: 4px;
+}
+
+
+/* -------------------- 各种按钮 ---------------------------- */
+#tabCloseButton {
+    margin-top: 2px;
+    background: none;
+    border: none;
+    padding: 0px -2px;
+    qproperty-icon: url({{dock_close_button_url}}), url(:/ads/images/close-button-disabled.svg) disabled;
+    qproperty-iconSize: 16px;
+}
+
+#tabCloseButton:hover {
+    border: 1px solid {{theme_color_pressed}};
+    background: {{theme_color_hover}};
+}
+
+#tabCloseButton:pressed {
+    background: {{theme_color_pressed}};
+}
+
+#dockAreaCloseButton {
+    margin-top: 2px;
+    background: none;
+    border: none;
+    padding: 0px -2px;
+    qproperty-icon: url({{dock_close_button_url}}), url(:/ads/images/close-button-disabled.svg) disabled;
+    qproperty-iconSize: 16px;
+}
+
+#dockAreaCloseButton:hover {
+    border: 1px solid {{theme_color_pressed}};
+    background: {{theme_color_hover}};
+}
+
+#dockAreaCloseButton:pressed {
+    background: {{theme_color_pressed}};
+}
